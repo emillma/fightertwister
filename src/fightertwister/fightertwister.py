@@ -1,7 +1,7 @@
 from pygame import midi
 import time
 import threading
-from encoder import Encoder
+from .encoder import Encoder
 
 
 class FighterTwister:

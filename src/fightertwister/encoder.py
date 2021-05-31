@@ -1,5 +1,5 @@
 
-from utils import to7bit, clamp
+from .utils import to7bit, clamp
 
 
 class Encoder:
