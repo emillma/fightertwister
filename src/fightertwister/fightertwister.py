@@ -1,12 +1,15 @@
 from pygame import midi
 import time
+import numpy as np
 import threading
 from .encoder import Encoder
+from .encoder_slice import EncoderSlice
 
 
 class FighterTwister:
     def __init__(self):
-        self.knobs = [Encoder(self, i) for i in range(64)]
+        self.encoders = EncoderSlice(
+            np.array([Encoder(self, i) for i in range(64)]))
 
         self.stop = False
         self.prev_timestamp = 0
@@ -27,9 +30,11 @@ class FighterTwister:
     def parse_input(self, message, timestamp):
         status = message[0]
         if status == 176:
-            self.knobs[message[1]].callback_encoder_base(message[2], timestamp)
+            self.encoders[message[1]].callback_encoder_base(
+                message[2], timestamp)
         if status == 177:
-            self.knobs[message[1]].callback_switch_base(message[2], timestamp)
+            self.encoders[message[1]].callback_switch_base(
+                message[2], timestamp)
 
     def loop(self):
         while not self.stop:
@@ -45,9 +50,3 @@ class FighterTwister:
     def run(self):
         self.thread = threading.Thread(target=self.loop)
         self.thread.start()
-
-
-if __name__ == '__main__':
-    ft = FighterTwister()
-    with ft:
-        input()
