@@ -4,7 +4,7 @@ import time
 from pygame import midi
 if True:
     sys.path.insert(0, 'src')
-from fightertwister import FighterTwister, Encoder, encoder, ft_colors
+from fightertwister import FighterTwister, Encoder, ft_colors
 
 
 ft = FighterTwister()
@@ -15,11 +15,11 @@ subselection = ft.encoders[:1]
 def myfunction(self: Encoder, timestamp):
     colors = np.zeros(subselection.shape)
     colors[:] = ft_colors.blue
-    colors[subselection.get_idx(encoder)] = ft_colors.green
+    colors[subselection.get_idx(self)] = ft_colors.green
     subselection.set_color(colors)
 
 
-# subselection.register_cb_hold(myfunction)
+subselection.register_cb_hold(myfunction)
 
 
 def hold(self: Encoder, timesamp):

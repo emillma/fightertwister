@@ -1,12 +1,14 @@
-
-from pygame import midi
 from .utils import to7bit, clamp
 from .button import Button
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .fightertwister import FighterTwister
+
 
 class Encoder(Button):
-    def __init__(self, fightertwister, idx,
-                 delay_hold=500,
+    def __init__(self, fightertwister: 'FighterTwister', idx,
+                 delay_hold=400,
                  delay_click=200,
                  delay_dbclick=300):
         super().__init__(fightertwister,

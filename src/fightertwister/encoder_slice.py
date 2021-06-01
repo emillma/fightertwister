@@ -14,8 +14,8 @@ class EncoderSlice:
         self.encoders_raveled = encoders.ravel()
         self.shape = self.encoders.shape
         self.idx_table = dict(
-            zip(self,
-                map(tuple, np.indices(self.encoders.shape).reshape(2, -1))))
+            zip(self, map(tuple, np.indices(self.encoders.shape).reshape(
+                self.encoders.ndim, -1).T)))
 
     def __getitem__(self, indices):
         item = self.encoders[indices]
@@ -33,7 +33,7 @@ class EncoderSlice:
         return values.reshape(self.shape)
 
     def get_idx(self, encoder):
-        self.idx_table[encoder]
+        return self.idx_table[encoder]
 
     def __getattribute__(self, name: str):
         if (hasattr(Encoder, name) and callable(getattr(Encoder, name))
