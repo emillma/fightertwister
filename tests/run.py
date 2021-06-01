@@ -9,17 +9,28 @@ from fightertwister import FighterTwister, Encoder, ft_colors
 
 ft = FighterTwister()
 
-subselection = ft.encoders[:1]
+subs1 = ft.encoders[:, 2:]
+subs2 = ft.encoders[:, :2]
 
 
 def myfunction(self: Encoder, timestamp):
-    colors = np.zeros(subselection.shape)
+    colors = np.zeros(subs1.shape)
     colors[:] = ft_colors.blue
-    colors[subselection.get_idx(self)] = ft_colors.green
-    subselection.set_color(colors)
+    colors[subs1.get_idx(self)] = ft_colors.green
+    subs1.set_color(colors)
 
 
-subselection.register_cb_hold(myfunction)
+subs1.register_cb_hold(myfunction)
+
+
+def myfunction(self: Encoder, timestamp):
+    colors = np.zeros(subs2.shape)
+    colors[:] = ft_colors.blue
+    colors[subs2.get_idx(self)] = ft_colors.green
+    subs2.set_color(colors)
+
+
+subs2.register_cb_hold(myfunction)
 
 
 def foo(self: Encoder, timestamp):
@@ -63,7 +74,6 @@ ft.encoders.register_cb_click(click)
 # ft.encoders.register_cb_dbclick(dbclick)
 with ft:
     ft.encoders.set_value(0)
-    print(ft.encoders.value)
     ft.encoders.set_color(ft_colors.blue)
     # ft.encoders[:, ::2, ::2].set_color(ft_colors.cyan)
     # ft.encoders[0, 0, [0, 1, 2]].set_color(
