@@ -12,7 +12,7 @@ from .utils import Task
 class FighterTwister:
     def __init__(self):
         self.encoders = EncoderSlice(
-            np.array([Encoder(self, i) for i in range(64)]))
+            np.array([Encoder(self, i) for i in range(64)]).reshape(4, 4, 4))
         self.stop = False
         self.prev_timestamp = 0
         self.queue = SortedKeyList([], key=lambda x: x.timestamp)

@@ -4,6 +4,10 @@ from collections.abc import Iterable
 from .encoder import Encoder
 
 
+def num_params(callable):
+    return len(inspect.signature(callable).parameters)
+
+
 class EncoderSlice:
     def __init__(self, encoders: np.ndarray):
         self.encoders = encoders
@@ -16,12 +20,6 @@ class EncoderSlice:
         else:
             return EncoderSlice(item)
 
-    def to_iterable(self, value):
-        if isinstance(value, Iterable):
-            return value
-        else:
-            return [value]*self.encoders.size
-
     def toarray(self, iter):
         return np.array(iter).reshape(self.encoders.shape)
 
@@ -30,14 +28,12 @@ class EncoderSlice:
                 and num_params(getattr(Encoder, name)) == 2):
 
             def multicall(param):
-
-                params = self.to_iterable(param)
-                for enc, param in zip(self.encoders, params):
-                    getattr(enc, name)(param)
+                encoders, params = np.broadcast_arrays(self.encoders, param)
+                for enc, param in zip(encoders.ravel(), params.ravel()):
+                    if isinstance(enc, Encoder):
+                        getattr(enc, name)(param)
+                    else:
+                        getattr(EncoderSlice(enc), name)(param)
             return multicall
         else:
             return object.__getattribute__(self, name)
-
-
-def num_params(callable):
-    return len(inspect.signature(callable).parameters)
