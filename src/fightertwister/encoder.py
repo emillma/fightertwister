@@ -8,31 +8,39 @@ class Encoder:
         self.idx = idx
         self.pressed = 0
         self.value = 0
-        self.prev_encoder_ts = 0
-        self.prev_on_ts = 0
-        self.prev_off_ts = 0
 
-    def callback_encoder(self, encoder, timestamp): pass
+        self.ts_prev_encoder = 0
+        self.ts_prev_on = 0
+        self.ts_prev_off = 0
 
-    def callback_switch_off(self, encoder, timestamp): pass
+        self.cb_encoder = lambda self, timestamp: None
+        self.cb_switch_off = lambda selfcoder, timestamp: None
+        self.cb_switch_on = lambda self, timestamp: None
 
-    def callback_switch_on(self, encoder, timestamp): pass
+    def register_cb_encoder(self, encoder_cb):
+        self.encoder_cb = encoder_cb
 
-    def callback_encoder_base(self, value, timestamp):
+    def register_cb_switch_off(self, switch_off_cb):
+        self.cb_switch_off = switch_off_cb
+
+    def register_cb_switch_on(self, switch_on_cb):
+        self.cb_switch_on = switch_on_cb
+
+    def cb_encoder_base(self, value, timestamp):
         self.set_value(self.value + (value-64)/1000)
-        self.callback_encoder(self.value, timestamp)
-        self.prev_encoder_ts = timestamp
+        self.cb_encoder(self, timestamp)
+        self.ts_prev_encoder = timestamp
 
-    def callback_switch_base(self, value, timestamp):
+    def cb_switch_base(self, value, timestamp):
         self.last_sent_switch = timestamp
         if value:
             self.pressed = 1
-            self.callback_switch_on(self.value, timestamp)
-            self.prev_on_ts = timestamp
+            self.cb_switch_on(self, timestamp)
+            self.ts_prev_on = timestamp
         else:
             self.pressed = 0
-            self.callback_switch_off(self.value, timestamp)
-            self.prev_off_ts = timestamp
+            self.cb_switch_off(self, timestamp)
+            self.ts_prev_off = timestamp
 
     def set_value(self, value):
         self.value = clamp(value, 0, 1)

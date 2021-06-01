@@ -23,6 +23,21 @@ class EncoderSlice:
     def toarray(self, iter):
         return np.array(iter).reshape(self.encoders.shape)
 
+    def register_cb_encoder(self, encoder_cb):
+        for enc, encoder_cb in zip(self.encoders,
+                                   self.to_iterable(encoder_cb)):
+            enc.register_cb_encoder(encoder_cb)
+
+    def register_cb_switch_off(self, switch_off_cb):
+        for enc, encoder_cb in zip(self.encoders,
+                                   self.to_iterable(switch_off_cb)):
+            enc.register_cb_switch_off(switch_off_cb)
+
+    def register_cb_switch_on(self, switch_on_cb):
+        for enc, encoder_cb in zip(self.encoders,
+                                   self.to_iterable(switch_on_cb)):
+            enc.register_cb_switch_on(switch_on_cb)
+
     def set_value(self, value):
         return self.toarray(
             [enc.set_value(val)
