@@ -4,47 +4,82 @@ from collections.abc import Iterable
 from .encoder import Encoder
 
 
-def num_params(callable):
-    return len(inspect.signature(callable).parameters)
+class ObjectCollection:
 
+    def __init__(self,
+                 objects: np.ndarray,
+                 objecttype: object,
+                 absolute_indices: np.ndarray = None):
 
-class EncoderSlice(Encoder):
-    def __init__(self, encoders: np.ndarray):
-        self.encoders = encoders
-        self.shape = self.encoders.shape
-        indices = map(tuple, np.indices(self.encoders.shape).reshape(
-            self.encoders.ndim, -1).T)
-        self.idx_table = dict(zip(self, map(tuple, indices)))
-
-    def __getitem__(self, indices):
-        item = self.encoders[indices]
-        if isinstance(item, Encoder):
-            return item
-        else:
-            return EncoderSlice(item)
-
-    def __iter__(self):
-        return (i.item() for i in np.nditer(self.encoders, ["refs_ok"]))
+        self.objects = objects
+        self.indices = self.get_indices(objects)
+        self.absolute_indices = (absolute_indices
+                                 if absolute_indices is not None
+                                 else self.indices)
+        self.idx_table = dict(zip(objects.ravel(), self.indices.ravel()))
+        self.objecttype = objecttype
 
     @ property
-    def value(self):
-        values = np.array([enc.value for enc in self])
-        return values.reshape(self.shape)
+    def shape(self):
+        return self.objects.shape
 
-    def get_idx(self, encoder):
-        return self.idx_table[encoder]
+    @ property
+    def size(self):
+        return self.objects.size
+
+    def get_idx(self, obj):
+        return self.idx_table[obj]
+
+    def __getitem__(self, indices):
+        item = self.objects[indices]
+        return (item if isinstance(item, Encoder)
+                else ObjectCollection(item,
+                                      self.objecttype,
+                                      self.absolute_indices[indices]))
 
     def __getattribute__(self, name: str):
-        if (hasattr(Encoder, name) and callable(getattr(Encoder, name))
-                and num_params(getattr(Encoder, name)) in (1, 2)):
-
-            def multicall(param):
-                encoders, params = np.broadcast_arrays(self.encoders, param)
-                for enc, param in zip(self, params.ravel()):
-                    if isinstance(enc, Encoder):
-                        getattr(enc, name)(param)
-                    else:
-                        getattr(EncoderSlice(enc), name)(param)
-            return multicall
-        else:
+        if hasattr(ObjectCollection, name):
             return object.__getattribute__(self, name)
+        elif name in ['objects',
+                      'indices',
+                      'absolute_indices',
+                      'idx_table',
+                      'objecttype']:
+            return object.__getattribute__(self, name)
+        elif callable(getattr(self.objecttype, name)):
+            def multicall(*args, **kwargs):
+                output = np.empty(self.shape, object)
+                output_args = np.empty(self.size, object)
+                output_args[:] = [list() for i in range(self.size)]
+                output_args = output_args.reshape(self.shape)
+
+                output_kwargs = np.empty(self.size, object)
+                output_kwargs[:] = [dict() for i in range(self.size)]
+                output_kwargs = output_kwargs.reshape(self.shape)
+
+                for arg in args:
+                    args_broadcasted = np.broadcast_to(arg, self.shape)
+                    for idx in self.indices:
+                        output_args[idx].append(args_broadcasted[idx])
+                for key, item in kwargs.items():
+                    kwargs_broadcasted = np.broadcast_to(item, self.shape)
+                    for idx in self.indices:
+                        output_kwargs[idx][key] = kwargs_broadcasted[idx]
+                for idx in self.indices.ravel():
+                    output[idx] = getattr(self.objects[idx], name)(
+                        *output_args[idx], **output_kwargs[idx])
+                return output
+            return multicall
+
+    @ staticmethod
+    def get_indices(array: np.ndarray):
+        indices = np.indices(array.shape).reshape(array.ndim, -1).T
+        out = np.empty(array.size, dtype=object)
+        out[:] = list(map(tuple, indices))
+        return out
+
+
+class EncoderSlice(ObjectCollection, Encoder):
+    def __init__(self, encoders: np.ndarray):
+        ObjectCollection.__init__(self, encoders, Encoder)
+        self.encoders = self.objects
