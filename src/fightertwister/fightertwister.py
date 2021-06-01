@@ -1,9 +1,12 @@
 from pygame import midi
 import time
+import bisect
 import numpy as np
 import threading
+from sortedcontainers import SortedKeyList
 from .encoder import Encoder
 from .encoder_slice import EncoderSlice
+from .utils import Task
 
 
 class FighterTwister:
@@ -13,6 +16,7 @@ class FighterTwister:
 
         self.stop = False
         self.prev_timestamp = 0
+        self.queue = SortedKeyList([], key=lambda x: x.timestamp)
 
     def __enter__(self):
         midi.init()
@@ -36,15 +40,24 @@ class FighterTwister:
             self.encoders[message[1]].cb_switch_base(
                 message[2], timestamp)
 
+    def add_task_at(self, timestamp, function, args=[], kwargs={}):
+        task = Task(timestamp, function, args, kwargs)
+        self.queue.add(task)
+
+    def add_task_delay(self, delay, function, args=[], kwargs={}):
+        self.add_task_at(midi.time()+delay, function, args, kwargs)
+
     def loop(self):
         while not self.stop:
-            data = []
             while self.midi_in.poll():
                 message, timestamp = self.midi_in.read(1)[0]
-                data.append([message, timestamp])
+                self.add_task_at(timestamp, self.parse_input,
+                                 [message, timestamp])
 
-            for message, timestamp in data:
-                self.parse_input(message, timestamp)
+            while self.queue and self.queue[0].timestamp < midi.time():
+                task = self.queue.pop(0)
+                task.execute()
+
             time.sleep(0.01)
 
     def run(self):

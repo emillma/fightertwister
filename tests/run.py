@@ -12,14 +12,15 @@ layer1 = ft.encoders[:16]
 
 
 def cb_on(self: Encoder, timestamp):
-    self.set_color(ft_colors.magenta)
+    ft.add_task_delay(1000, lambda: self.set_color(ft_colors.green))
 
 
 def cb_off(self: Encoder, timestamp):
-    if timestamp < self.ts_prev_on + 1000:
-        self.set_color(ft_colors.green)
-    else:
-        self.set_color(ft_colors.orange)
+    #     pass
+    # if timestamp < self.ts_prev_on + 1000:
+    self.set_color(ft_colors.blue)
+    # else:
+    #     self.set_color(ft_colors.orange)
 
 
 layer1.register_cb_switch_on(cb_on)
@@ -27,8 +28,6 @@ layer1.register_cb_switch_off(cb_off)
 
 with ft:
     ft.encoders.set_value(0)
-    values = np.zeros(64)
-    # for i in range(1000):
-    # ft.encoders.set_color(values)
-    # time.sleep(0.1)
+    ft.encoders.set_color(ft_colors.blue)
+
     input()
