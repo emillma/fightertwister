@@ -20,6 +20,10 @@ def click(self: Encoder, timestamp):
     print('click')
 
 
+def slowclick(self: Encoder, timestamp):
+    print('slowclick')
+
+
 def dbclick(self: Encoder, timestamp):
     print('dbclick')
 
@@ -32,11 +36,12 @@ def release(self: Encoder, timestamp):
     print('release')
 
 
-layer1.register_cb_switch_press(press)
-layer1.register_cb_switch_release(release)
+# layer1.register_cb_switch_press(press)
+# layer1.register_cb_switch_release(release)
 layer1.register_cb_hold(hold)
-layer1.register_cb_click(click)
-layer1.register_cb_dbclick(dbclick)
+# layer1.register_cb_click(click)
+# layer1.register_cb_slowclick(slowclick)
+# layer1.register_cb_dbclick(dbclick)
 with ft:
     ft.encoders.set_value(0)
     ft.encoders.set_color(ft_colors.blue)

@@ -7,6 +7,7 @@ from .encoder import Encoder
 class EncoderSlice:
     def __init__(self, encoders: np.ndarray):
         self.encoders = encoders
+        self.shape = self.encoders.shape
 
     def __getitem__(self, indices):
         item = self.encoders[indices]
@@ -26,9 +27,7 @@ class EncoderSlice:
 
     def __getattribute__(self, name: str):
         if (hasattr(Encoder, name) and callable(getattr(Encoder, name))
-            and len(
-                inspect.signature(getattr(Encoder, name)).parameters
-        ) == 2):
+                and num_params(getattr(Encoder, name)) == 2):
 
             def multicall(param):
 
@@ -38,3 +37,7 @@ class EncoderSlice:
             return multicall
         else:
             return object.__getattribute__(self, name)
+
+
+def num_params(callable):
+    return len(inspect.signature(callable).parameters)

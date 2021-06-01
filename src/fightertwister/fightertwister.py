@@ -13,7 +13,6 @@ class FighterTwister:
     def __init__(self):
         self.encoders = EncoderSlice(
             np.array([Encoder(self, i) for i in range(64)]))
-
         self.stop = False
         self.prev_timestamp = 0
         self.queue = SortedKeyList([], key=lambda x: x.timestamp)
@@ -33,11 +32,12 @@ class FighterTwister:
 
     def parse_input(self, message, timestamp):
         status = message[0]
+        enc_idx = np.unravel_index(message[1], self.encoders.shape)
         if status == 176:
-            self.encoders[message[1]]._cb_encoder_base(
+            self.encoders[enc_idx]._cb_encoder_base(
                 message[2], timestamp)
         if status == 177:
-            self.encoders[message[1]]._cb_switch_base(
+            self.encoders[enc_idx]._cb_button_base(
                 message[2], timestamp)
 
     def add_task_at(self, timestamp, function, args=[], kwargs={}):
