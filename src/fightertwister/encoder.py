@@ -25,7 +25,7 @@ class Encoder(Button):
         self._cbs_encoder.add(callback)
 
     def _cb_encoder_base(self, value, timestamp):
-        self.set_value(self.value + (value-64)/1000)
+        self.set_value(round(self.value + (value-64)/1000, 3))
         for cb in self._cbs_encoder:
             cb(self, timestamp)
         self.ts_prev_encoder = timestamp

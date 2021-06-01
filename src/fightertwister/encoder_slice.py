@@ -8,14 +8,13 @@ def num_params(callable):
     return len(inspect.signature(callable).parameters)
 
 
-class EncoderSlice:
+class EncoderSlice(Encoder):
     def __init__(self, encoders: np.ndarray):
         self.encoders = encoders
-        self.encoders_raveled = encoders.ravel()
         self.shape = self.encoders.shape
-        self.idx_table = dict(
-            zip(self, map(tuple, np.indices(self.encoders.shape).reshape(
-                self.encoders.ndim, -1).T)))
+        indices = map(tuple, np.indices(self.encoders.shape).reshape(
+            self.encoders.ndim, -1).T)
+        self.idx_table = dict(zip(self, map(tuple, indices)))
 
     def __getitem__(self, indices):
         item = self.encoders[indices]
@@ -25,10 +24,10 @@ class EncoderSlice:
             return EncoderSlice(item)
 
     def __iter__(self):
-        return iter(self.encoders_raveled)
+        return (i.item() for i in np.nditer(self.encoders, ["refs_ok"]))
 
     @ property
-    def values(self):
+    def value(self):
         values = np.array([enc.value for enc in self])
         return values.reshape(self.shape)
 

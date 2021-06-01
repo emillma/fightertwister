@@ -22,10 +22,12 @@ class Task:
 class ft_colors:
     red = 84
     green = 45
+    dark_blue = 1
     blue = 1
-    lightblue = 30
+    light_blue = 24
     cyan = 40
     magenta = 105
-    yellow = 68
-    orange = 75
+    yellow = 64
+    bright_orange = 69
+    orange = 76
     purple = 110
