@@ -34,10 +34,10 @@ class FighterTwister:
     def parse_input(self, message, timestamp):
         status = message[0]
         if status == 176:
-            self.encoders[message[1]].cb_encoder_base(
+            self.encoders[message[1]]._cb_encoder_base(
                 message[2], timestamp)
         if status == 177:
-            self.encoders[message[1]].cb_switch_base(
+            self.encoders[message[1]]._cb_switch_base(
                 message[2], timestamp)
 
     def add_task_at(self, timestamp, function, args=[], kwargs={}):

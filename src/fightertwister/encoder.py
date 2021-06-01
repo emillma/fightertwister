@@ -18,7 +18,7 @@ class Encoder:
         self._cb_switch_release = lambda selfcoder, timestamp: None
         self._cb_switch_press = lambda self, timestamp: None
 
-        self._delay_hold = 1000
+        self._delay_hold = 500
         self._delay_click = 200
         self._delay_dbclick = 300
         self._cb_hold = lambda self, ts_eval: None
@@ -47,12 +47,12 @@ class Encoder:
     def register_cb_dbclick(self, callback):
         self._cb_dbclick = callback
 
-    def cb_encoder_base(self, value, timestamp):
+    def _cb_encoder_base(self, value, timestamp):
         self.set_value(self.value + (value-64)/1000)
         self._cb_encoder(self, timestamp)
         self.ts_prev_encoder = timestamp
 
-    def cb_switch_base(self, value, timestamp):
+    def _cb_switch_base(self, value, timestamp):
         self.last_sent_switch = timestamp
         if value:
             self.pressed = 1

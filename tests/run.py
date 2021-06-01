@@ -32,7 +32,7 @@ def release(self: Encoder, timestamp):
     print('release')
 
 
-layer1.register_cb_switch_press(release)
+layer1.register_cb_switch_press(press)
 layer1.register_cb_switch_release(release)
 layer1.register_cb_hold(hold)
 layer1.register_cb_click(click)
