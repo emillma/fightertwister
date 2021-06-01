@@ -5,19 +5,12 @@ from .encoder import Encoder
 
 
 class ObjectCollection:
-
     def __init__(self,
-                 objects: np.ndarray,
-                 objecttype: object,
-                 absolute_indices: np.ndarray = None):
+                 objects: np.ndarray):
 
         self.objects = objects
         self.indices = self.get_indices(objects)
-        self.absolute_indices = (absolute_indices
-                                 if absolute_indices is not None
-                                 else self.indices)
         self.idx_table = dict(zip(objects.ravel(), self.indices.ravel()))
-        self.objecttype = objecttype
 
     @ property
     def shape(self):
@@ -33,20 +26,14 @@ class ObjectCollection:
     def __getitem__(self, indices):
         item = self.objects[indices]
         return (item if isinstance(item, Encoder)
-                else ObjectCollection(item,
-                                      self.objecttype,
-                                      self.absolute_indices[indices]))
+                else ObjectCollection(item))
 
     def __getattribute__(self, name: str):
-        if hasattr(ObjectCollection, name):
+        if (hasattr(ObjectCollection, name)
+                or name in ['objects', 'indices', 'idx_table']):
             return object.__getattribute__(self, name)
-        elif name in ['objects',
-                      'indices',
-                      'absolute_indices',
-                      'idx_table',
-                      'objecttype']:
-            return object.__getattribute__(self, name)
-        elif callable(getattr(self.objecttype, name)):
+
+        elif callable(getattr(self.objects[self.indices[0]], name)):
             def multicall(*args, **kwargs):
                 output = np.empty(self.shape, object)
                 output_args = np.empty(self.size, object)
@@ -70,6 +57,11 @@ class ObjectCollection:
                         *output_args[idx], **output_kwargs[idx])
                 return output
             return multicall
+        else:
+            output = np.empty(self.shape, object)
+            for idx in self.indices.ravel():
+                output[idx] = getattr(self.objects[idx], name)
+            return output
 
     @ staticmethod
     def get_indices(array: np.ndarray):
@@ -81,5 +73,5 @@ class ObjectCollection:
 
 class EncoderSlice(ObjectCollection, Encoder):
     def __init__(self, encoders: np.ndarray):
-        ObjectCollection.__init__(self, encoders, Encoder)
+        ObjectCollection.__init__(self, encoders)
         self.encoders = self.objects

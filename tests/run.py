@@ -63,6 +63,7 @@ ft.encoders.register_cb_click(click)
 # ft.encoders.register_cb_dbclick(dbclick)
 with ft:
     ft.encoders.set_value(0)
+    print(ft.encoders.value)
     ft.encoders.set_color(ft_colors.blue)
     # ft.encoders[:, ::2, ::2].set_color(ft_colors.cyan)
     # ft.encoders[0, 0, [0, 1, 2]].set_color(
