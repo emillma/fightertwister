@@ -10,8 +10,8 @@ from .utils import Task
 
 
 class FighterTwister:
-    def __init__(self):
-        self.encoders = EncoderSlice(
+    def __init__(self, encoders=None):
+        self.encoders = encoders or EncoderSlice(
             np.array([Encoder(self, i) for i in range(64)]).reshape(4, 4, 4))
         self.stop = False
         self.prev_timestamp = 0

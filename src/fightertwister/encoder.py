@@ -17,15 +17,19 @@ class Encoder(Button):
         self.value = 0
 
         self.ts_prev_encoder = 0
-        self._cb_encoder = lambda self, timestamp: None
+        self._cbs_encoder = set()
 
     def register_cb_encoder(self, callback):
-        self.encoder_cb = callback
+        self._cbs_encoder.add(callback)
 
     def _cb_encoder_base(self, value, timestamp):
         self.set_value(self.value + (value-64)/1000)
-        self._cb_encoder(self, timestamp)
+        for cb in self._cbs_encoder:
+            cb(self, timestamp)
         self.ts_prev_encoder = timestamp
+
+    def clear_cbs_encoder(self, callback):
+        self._cbs_encoder.clear()
 
     def set_value(self, value):
         self.value = clamp(value, 0, 1)
