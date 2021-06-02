@@ -1,5 +1,10 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .fightertwister import FighterTwister
+
+
 class Button:
-    def __init__(self, fightertwister,
+    def __init__(self, fightertwister: 'FighterTwister',
                  delay_hold=500,
                  delay_click=200,
                  delay_dbclick=300):

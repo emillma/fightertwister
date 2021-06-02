@@ -5,17 +5,21 @@ import numpy as np
 import threading
 from sortedcontainers import SortedKeyList
 from .encoder import Encoder
-from .encoder_slice import EncoderSlice
+from .button import Button
+from .ftcollections import EncoderCollection, ButtoCollection
 from .utils import Task
 
 
 class FighterTwister:
-    def __init__(self, encoders=None):
-        self.encoders = encoders or EncoderSlice(
-            np.array([Encoder(self, i) for i in range(64)]).reshape(4, 4, 4))
-        self.stop = False
-        self.prev_timestamp = 0
+    def __init__(self):
+        encoders = np.array([Encoder(self, i) for i in range(64)])
+        self.encoders = EncoderCollection(encoders.reshape(4, 4, 4))
+
+        sidebuttons = np.array([Button(self) for i in range(8, 32)])
+        self.sidebuttons = ButtoCollection(sidebuttons.reshape(4, 3, 2))
+        self.current_bank = 0
         self.queue = SortedKeyList([], key=lambda x: x.timestamp)
+        self.stop = False
 
     def __enter__(self):
         midi.init()
@@ -30,14 +34,34 @@ class FighterTwister:
         self.midi_out.close()
         midi.quit()
 
+    def set_bank(self, bank):
+        self.current_bank = bank
+        # self.midi_out.write_short(179, self.current_bank, 127)
+        self.midi_out.write_short(179, self.current_bank, 127)
+
+    def next_bank(self):
+        self.set_bank((self.current_bank+1) % 4)
+
+    def prev_bank(self):
+        self.set_bank((self.current_bank-1) % 4)
+
     def parse_input(self, message, timestamp):
+        # print(message)
         status = message[0]
-        enc_idx = np.unravel_index(message[1], self.encoders.shape)
         if status == 176:
+            enc_idx = np.unravel_index(message[1], self.encoders.shape)
             self.encoders[enc_idx]._cb_encoder_base(
                 message[2], timestamp)
+
         if status == 177:
+            enc_idx = np.unravel_index(message[1], self.encoders.shape)
             self.encoders[enc_idx]._cb_button_base(
+                message[2], timestamp)
+
+        if status == 179:
+            enc_idx = np.unravel_index(message[1]-8, (4, 2, 3))
+            enc_idx = (enc_idx[0], enc_idx[2], enc_idx[1])
+            self.sidebuttons[enc_idx]._cb_button_base(
                 message[2], timestamp)
 
     def add_task_at(self, timestamp, function, args=[], kwargs={}):
