@@ -1,6 +1,5 @@
 from pygame import midi
 import time
-import bisect
 import numpy as np
 import threading
 from sortedcontainers import SortedKeyList

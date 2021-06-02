@@ -25,7 +25,7 @@ class ft_colors:
     dark_blue = 1
     blue = 1
     light_blue = 24
-    cyan = 40
+    cyan = 38
     magenta = 105
     yellow = 64
     bright_orange = 69

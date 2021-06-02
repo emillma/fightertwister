@@ -1,3 +1,5 @@
+import numpy as np
+from pygame import midi
 from .utils import to7bit, clamp
 from .button import Button
 
@@ -16,16 +18,31 @@ class Encoder(Button):
 
         self.ft = fightertwister
         self.idx = idx
-        self.value = 0
-        self.ts_prev_encoder = 0
 
+        self._value = 0
+        self.extra_values = np.empty(0, float)
+        self.on = 1
+
+        self.ts_prev_encoder = 0
         self._cbs_encoder = set()
+        self._cbs_on = set([lambda *_: self.set_indicator_brightness(1)])
+        self._cbs_off = set([lambda *_: self.set_indicator_brightness(0.4)])
+
+    @property
+    def value(self):
+        return self.value * self.on
 
     def register_cb_encoder(self, callback):
         self._cbs_encoder.add(callback)
 
+    def register_cb_on(self, callback):
+        self._cbs_encoder.add(callback)
+
+    def register_cb_off(self, callback):
+        self._cbs_encoder.add(callback)
+
     def _cb_encoder_base(self, value, timestamp):
-        self.set_value(round(self.value + (value-64)/1000, 3))
+        self.set_value(round(self._value + (value-64)/1000, 3))
         for cb in self._cbs_encoder:
             cb(self, timestamp)
         self.ts_prev_encoder = timestamp
@@ -33,9 +50,27 @@ class Encoder(Button):
     def clear_cbs_encoder(self, callback):
         self._cbs_encoder.clear()
 
+    def clear_cbs_on(self, callback):
+        self._cbs_on.clear()
+
+    def clear_cbs_off(self, callback):
+        self.cbs_off.clear()
+
     def set_value(self, value):
-        self.value = clamp(value, 0, 1)
+        self._value = clamp(value, 0, 1)
         self.ft.midi_out.write_short(176, self.idx, to7bit(value))
+
+    def set_extra_values(self, extra_values):
+        self.extra_values = extra_values
+
+    def set_on_off(self, on):
+        self.on = on
+        if self.on:
+            for cb in self._cbs_on:
+                cb(self, midi.time())
+        else:
+            for cb in self._cbs_off:
+                cb(self, midi.time())
 
     def set_color(self, color):
         """ 0 to 127"""

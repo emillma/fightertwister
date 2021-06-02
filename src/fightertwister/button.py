@@ -7,7 +7,7 @@ class Button:
     def __init__(self, fightertwister: 'FighterTwister',
                  delay_hold=500,
                  delay_click=200,
-                 delay_dbclick=300):
+                 delay_dbclick=200):
 
         self.ft = fightertwister
         self.pressed = 0

@@ -4,7 +4,8 @@ import numpy as np
 class ObjectCollection:
     def __init__(self,
                  objects: np.ndarray):
-
+        if not isinstance(objects, np.ndarray):
+            objects = np.array([objects], object)
         self._objects = objects
         self._indices = self._get_indices(objects)
         self._idx_table = dict(zip(objects.ravel(), self._indices.ravel()))
@@ -16,6 +17,9 @@ class ObjectCollection:
     @ property
     def size(self):
         return self._objects.size
+
+    def ravel(self):
+        return ObjectCollection(self._objects.ravel())
 
     def get_idx(self, obj):
         return self._idx_table[obj]
@@ -38,7 +42,7 @@ class ObjectCollection:
             return object.__getattribute__(self, name)
 
         elif callable(getattr(self._objects[self._indices[0]], name)):
-            def multicall(*args, **kwargs):
+            def multicall(*args, _broadcast=True, **kwargs):
                 output = np.empty(self.shape, object)
                 output_args = np.empty(self.size, object)
                 output_args[:] = [list() for i in range(self.size)]
@@ -48,14 +52,24 @@ class ObjectCollection:
                 output_kwargs[:] = [dict() for i in range(self.size)]
                 output_kwargs = output_kwargs.reshape(self.shape)
 
-                for arg in args:
-                    args_broadcasted = np.broadcast_to(arg, self.shape)
-                    for idx in self._indices:
-                        output_args[idx].append(args_broadcasted[idx])
-                for key, item in kwargs.items():
-                    kwargs_broadcasted = np.broadcast_to(item, self.shape)
-                    for idx in self._indices:
-                        output_kwargs[idx][key] = kwargs_broadcasted[idx]
+                if _broadcast:
+                    for arg in args:
+                        args_broadcasted = np.broadcast_to(arg, self.shape)
+                        for idx in self._indices:
+                            output_args[idx].append(args_broadcasted[idx])
+                    for key, item in kwargs.items():
+                        kwargs_broadcasted = np.broadcast_to(item, self.shape)
+                        for idx in self._indices:
+                            output_kwargs[idx][key] = kwargs_broadcasted[idx]
+
+                else:
+                    for arg in args:
+                        for idx in self._indices:
+                            output_args[idx].append(arg)
+                    for key, item in kwargs.items():
+                        for idx in self._indices:
+                            output_args[idx][key] = item
+
                 for idx in self._indices.ravel():
                     output[idx] = getattr(self._objects[idx], name)(
                         *output_args[idx], **output_kwargs[idx])
