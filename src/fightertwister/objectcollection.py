@@ -26,7 +26,11 @@ class ObjectCollection:
                 else ObjectCollection(item))
 
     def __iter__(self):
-        return (i.item() for i in np.nditer(self._objects, ['refs_ok']))
+        # nditer does not work on empty array
+        if self._objects.size:
+            return (i.item() for i in np.nditer(self._objects, ['refs_ok']))
+        else:
+            return iter(tuple())
 
     def __getattribute__(self, name: str):
         if (hasattr(ObjectCollection, name)
