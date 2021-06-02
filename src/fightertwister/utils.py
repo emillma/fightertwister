@@ -1,3 +1,4 @@
+from scipy.interpolate import UnivariateSpline
 
 
 def clamp(value, minimum, maximum):
@@ -20,7 +21,7 @@ class Task:
 
 
 class ft_colors:
-    red = 84
+    red = 85
     green = 45
     dark_blue = 1
     blue = 1
@@ -31,3 +32,15 @@ class ft_colors:
     bright_orange = 69
     orange = 76
     purple = 110
+
+
+heat_spline = UnivariateSpline([0, 0.5, 0.6, 1],
+                               [ft_colors.blue,
+                               ft_colors.green,
+                               ft_colors.yellow,
+                               ft_colors.red],
+                               k=1)
+
+
+def heat_color(value):
+    return int(heat_spline(value)+0.5)

@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 class Button:
     def __init__(self, fightertwister: 'FighterTwister',
-                 delay_hold=500,
+                 delay_hold=300,
                  delay_click=200,
                  delay_dbclick=200):
 
@@ -73,7 +73,7 @@ class Button:
                 self._prev_press_was_dbclick = True
             ts_eval_hold = timestamp + self._delay_hold
             for cb in self._cbs_hold:
-                self.ft.add_task_at(ts_eval_hold, cb, *[self, ts_eval_hold])
+                self.ft.do_task_at(ts_eval_hold, cb, *[self, ts_eval_hold])
 
             self.ts_prev_press = timestamp
         else:

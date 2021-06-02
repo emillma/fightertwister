@@ -32,10 +32,6 @@ class FtBro(FighterTwister):
         self.colors_selector_default[0, 3] = self.color_main_volume
         self.colors_selector_default[1, 3] = self.color_mic
 
-        self.data = np.zeros(
-            (*self.enc_selectors.shape, *self.enc_params.shape))
-        self.current_node = (0, 0)
-
         self.selected_node = self.enc_selectors[0, 0]
         self.active_nodes = EncoderCollection(self.selected_node)
 
@@ -45,15 +41,13 @@ class FtBro(FighterTwister):
         self.nodes_on = np.zeros(self.enc_selectors.shape, int)
         self.selected_for_copy = np.zeros(self.enc_selectors.shape, int)
 
-        self.enc_selectors.set_delay_hold(200)
-
         self.enc_selectors.register_cb_hold(self.node_hold)
         self.enc_selectors.register_cb_click(self.toggle_onoff)
 
         self.enc_params.register_cb_encoder(self._param_enc)
 
         self.enc_nodes.register_cb_hold(self.togle_copy_mode)
-        # self.enc_nodes.register_cb_dbclick(self._toggle_unique)
+        self.enc_nodes.register_cb_dbclick(self.toggle_solo)
 
         # self.enc_mic.register_cb_hold(self._selector_select)
 
@@ -70,8 +64,7 @@ class FtBro(FighterTwister):
         self.enc_selectors.set_on_off(0)
         self.enc_params.set_value(0)
         self.enc_selectors.set_color(self.colors_selector_default)
-        self.enc_selectors[self.current_node].set_color(
-            self.color_node_selected)
+        self.selected_node.set_color(self.color_node_selected)
         self.enc_params.set_color(self.color_param_default)
 
     def _param_enc(self, encoder: Encoder, ts):
@@ -109,5 +102,9 @@ class FtBro(FighterTwister):
         self.active_nodes = EncoderCollection(self.selected_node)
 
     def toggle_onoff(self, node: Encoder, ts):
-        on = node.on ^ 1
-        node.set_on_off(on)
+        on_off = node.on ^ 1
+        node.set_on_off(on_off)
+
+    def toggle_solo(self, node: Encoder, ts):
+        node.set_on_off(1)
+        [i.set_on_off(0) for i in self.enc_nodes if i is not node]

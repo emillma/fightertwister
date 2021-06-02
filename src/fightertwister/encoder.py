@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 class Encoder(Button):
     def __init__(self, fightertwister: 'FighterTwister', idx,
-                 delay_hold=400,
+                 delay_hold=300,
                  delay_click=200,
                  delay_dbclick=200):
         super().__init__(fightertwister,
@@ -23,14 +23,17 @@ class Encoder(Button):
         self.extra_values = np.empty(0, float)
         self.on = 1
 
+        self.on_brightness = 1
+        self.off_brightness = 0.4
+
         self.ts_prev_encoder = 0
         self._cbs_encoder = set()
         self._cbs_on = set([lambda *_: self.set_indicator_brightness(1)])
         self._cbs_off = set([lambda *_: self.set_indicator_brightness(0.4)])
 
-    @property
+    @ property
     def value(self):
-        return self.value * self.on
+        return self._value * self.on
 
     def register_cb_encoder(self, callback):
         self._cbs_encoder.add(callback)
@@ -54,7 +57,7 @@ class Encoder(Button):
         self._cbs_on.clear()
 
     def clear_cbs_off(self, callback):
-        self.cbs_off.clear()
+        self._cbs_off.clear()
 
     def set_value(self, value):
         self._value = clamp(value, 0, 1)
@@ -71,6 +74,12 @@ class Encoder(Button):
         else:
             for cb in self._cbs_off:
                 cb(self, midi.time())
+
+    def set_on_brightness(self, brightenss):
+        self.on_brightenss = brightenss
+
+    def set_off_brightness(self, brightenss):
+        self.off_brightenss = brightenss
 
     def set_color(self, color):
         """ 0 to 127"""
