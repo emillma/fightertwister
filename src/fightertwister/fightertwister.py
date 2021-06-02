@@ -4,9 +4,9 @@ import bisect
 import numpy as np
 import threading
 from sortedcontainers import SortedKeyList
+from .ftcollections import EncoderCollection, ButtoCollection
 from .encoder import Encoder
 from .button import Button
-from .ftcollections import EncoderCollection, ButtoCollection
 from .utils import Task
 
 
@@ -62,19 +62,19 @@ class FighterTwister:
             self.sidebuttons[enc_idx]._cb_button_base(
                 message[2], timestamp)
 
-    def add_task_at(self, timestamp, function, args=[], kwargs={}):
+    def add_task_at(self, timestamp, function, *args, **kwargs):
         task = Task(timestamp, function, args, kwargs)
         self._queue.add(task)
 
-    def add_task_delay(self, delay, function, args=[], kwargs={}):
-        self.add_task_at(midi.time()+delay, function, args, kwargs)
+    def add_task_delay(self, delay, function, *args, **kwargs):
+        self.add_task_at(midi.time()+delay, function, *args, **kwargs)
 
     def loop(self):
         while not self._stop:
             while self.midi_in.poll():
                 message, timestamp = self.midi_in.read(1)[0]
                 self.add_task_at(timestamp, self.parse_input,
-                                 [message, timestamp])
+                                 *[message, timestamp])
 
             while self._queue and self._queue[0].timestamp < midi.time():
                 task = self._queue.pop(0)

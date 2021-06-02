@@ -10,7 +10,7 @@ class Encoder(Button):
     def __init__(self, fightertwister: 'FighterTwister', idx,
                  delay_hold=400,
                  delay_click=200,
-                 delay_dbclick=300):
+                 delay_dbclick=200):
         super().__init__(fightertwister,
                          delay_hold, delay_click, delay_dbclick)
 

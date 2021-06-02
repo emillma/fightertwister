@@ -17,6 +17,7 @@ class Button:
         self._delay_hold = delay_hold
         self._delay_click = delay_click
         self._delay_dbclick = delay_dbclick
+        self._prev_press_was_dbclick = False
 
         self._cbs_press = set()
         self._cbs_release = set()
@@ -27,6 +28,15 @@ class Button:
         self._cbs_slowclick = set()
 
         self._cbs_dbclick = set()
+
+    def set_delay_hold(self, delay):
+        self._delay_hold = delay
+
+    def set_delay_click(self, delay):
+        self._delay_click = delay
+
+    def set_delay_dbclick(self, delay):
+        self._delay_dbclick = delay
 
     def register_cb_press(self, callback):
         self._cbs_press.add(callback)
@@ -60,23 +70,25 @@ class Button:
             if self.ts_prev_press > timestamp - self._delay_dbclick:
                 for cb in self._cbs_dbclick:
                     cb(self, timestamp)
-
+                self._prev_press_was_dbclick = True
             ts_eval_hold = timestamp + self._delay_hold
             for cb in self._cbs_hold:
-                self.ft.add_task_at(ts_eval_hold, cb, [self, ts_eval_hold])
+                self.ft.add_task_at(ts_eval_hold, cb, *[self, ts_eval_hold])
 
             self.ts_prev_press = timestamp
         else:
             self.pressed = 0
             for cb in self._cbs_release:
                 cb(self, timestamp)
-            if self.ts_prev_press > timestamp - self._delay_click:
-                for cb in self._cbs_click:
-                    cb(self, timestamp)
-            else:
-                for cb in self._cbs_slowclick:
-                    cb(self, timestamp)
+            if not self._prev_press_was_dbclick:
+                if self.ts_prev_press > timestamp - self._delay_click:
+                    for cb in self._cbs_click:
+                        cb(self, timestamp)
+                else:
+                    for cb in self._cbs_slowclick:
+                        cb(self, timestamp)
             self.ts_prev_release = timestamp
+            self._prev_press_was_dbclick = False
 
     def clear_cbs_button_press(self):
         self._cbs_press.clear()

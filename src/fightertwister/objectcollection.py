@@ -25,6 +25,9 @@ class ObjectCollection:
         return (item if not isinstance(item, np.ndarray)
                 else ObjectCollection(item))
 
+    def __iter__(self):
+        return (i.item() for i in np.nditer(self._objects, ['refs_ok']))
+
     def __getattribute__(self, name: str):
         if (hasattr(ObjectCollection, name)
                 or name in ['_objects', '_indices', '_idx_table']):
