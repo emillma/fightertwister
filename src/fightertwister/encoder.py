@@ -17,8 +17,8 @@ class Encoder(Button):
         self.ft = fightertwister
         self.idx = idx
         self.value = 0
-
         self.ts_prev_encoder = 0
+
         self._cbs_encoder = set()
 
     def register_cb_encoder(self, callback):

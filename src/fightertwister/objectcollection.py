@@ -5,32 +5,32 @@ class ObjectCollection:
     def __init__(self,
                  objects: np.ndarray):
 
-        self.objects = objects
-        self.indices = self.get_indices(objects)
-        self.idx_table = dict(zip(objects.ravel(), self.indices.ravel()))
+        self._objects = objects
+        self._indices = self._get_indices(objects)
+        self._idx_table = dict(zip(objects.ravel(), self._indices.ravel()))
 
     @ property
     def shape(self):
-        return self.objects.shape
+        return self._objects.shape
 
     @ property
     def size(self):
-        return self.objects.size
+        return self._objects.size
 
     def get_idx(self, obj):
-        return self.idx_table[obj]
+        return self._idx_table[obj]
 
     def __getitem__(self, indices):
-        item = self.objects[indices]
+        item = self._objects[indices]
         return (item if not isinstance(item, np.ndarray)
                 else ObjectCollection(item))
 
     def __getattribute__(self, name: str):
         if (hasattr(ObjectCollection, name)
-                or name in ['objects', 'indices', 'idx_table']):
+                or name in ['_objects', '_indices', '_idx_table']):
             return object.__getattribute__(self, name)
 
-        elif callable(getattr(self.objects[self.indices[0]], name)):
+        elif callable(getattr(self._objects[self._indices[0]], name)):
             def multicall(*args, **kwargs):
                 output = np.empty(self.shape, object)
                 output_args = np.empty(self.size, object)
@@ -43,25 +43,25 @@ class ObjectCollection:
 
                 for arg in args:
                     args_broadcasted = np.broadcast_to(arg, self.shape)
-                    for idx in self.indices:
+                    for idx in self._indices:
                         output_args[idx].append(args_broadcasted[idx])
                 for key, item in kwargs.items():
                     kwargs_broadcasted = np.broadcast_to(item, self.shape)
-                    for idx in self.indices:
+                    for idx in self._indices:
                         output_kwargs[idx][key] = kwargs_broadcasted[idx]
-                for idx in self.indices.ravel():
-                    output[idx] = getattr(self.objects[idx], name)(
+                for idx in self._indices.ravel():
+                    output[idx] = getattr(self._objects[idx], name)(
                         *output_args[idx], **output_kwargs[idx])
                 return output
             return multicall
         else:
             output = np.empty(self.shape, object)
-            for idx in self.indices.ravel():
-                output[idx] = getattr(self.objects[idx], name)
+            for idx in self._indices.ravel():
+                output[idx] = getattr(self._objects[idx], name)
             return output
 
     @ staticmethod
-    def get_indices(array: np.ndarray):
+    def _get_indices(array: np.ndarray):
         indices = np.indices(array.shape).reshape(array.ndim, -1).T
         out = np.empty(array.size, dtype=object)
         out[:] = list(map(tuple, indices))

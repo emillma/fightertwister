@@ -7,10 +7,8 @@ from .objectcollection import ObjectCollection
 class EncoderCollection(ObjectCollection, Encoder):
     def __init__(self, encoders: np.ndarray):
         ObjectCollection.__init__(self, encoders)
-        self.encoders = self.objects
 
 
 class ButtoCollection(ObjectCollection, Button):
-    def __init__(self, encoders: np.ndarray):
-        ObjectCollection.__init__(self, encoders)
-        self.encoders = self.objects
+    def __init__(self, buttons: np.ndarray):
+        ObjectCollection.__init__(self, buttons)

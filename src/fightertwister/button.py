@@ -8,11 +8,12 @@ class Button:
                  delay_hold=500,
                  delay_click=200,
                  delay_dbclick=300):
+
         self.ft = fightertwister
         self.pressed = 0
-
         self.ts_prev_press = 0
         self.ts_prev_release = 0
+
         self._delay_hold = delay_hold
         self._delay_click = delay_click
         self._delay_dbclick = delay_dbclick

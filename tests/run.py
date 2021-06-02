@@ -1,13 +1,10 @@
 import numpy as np
 import sys
-import time
-from pygame import midi
 if True:
     sys.path.insert(0, 'src')
-from fightertwister import FighterTwister, Encoder, ft_colors
+from fightertwister import FighterTwister, Encoder, Button, ft_colors, FtBro
 
-
-ft = FighterTwister()
+ft = FtBro()
 
 
 def show_encoder_pos(self: Encoder, timesamp):

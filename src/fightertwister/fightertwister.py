@@ -18,8 +18,8 @@ class FighterTwister:
         sidebuttons = np.array([Button(self) for i in range(8, 32)])
         self.sidebuttons = ButtoCollection(sidebuttons.reshape(4, 3, 2))
         self.current_bank = 0
-        self.queue = SortedKeyList([], key=lambda x: x.timestamp)
-        self.stop = False
+        self._queue = SortedKeyList([], key=lambda x: x.timestamp)
+        self._stop = False
 
     def __enter__(self):
         midi.init()
@@ -28,7 +28,7 @@ class FighterTwister:
         self.run()
 
     def __exit__(self, type, value, traceback):
-        self.stop = True
+        self._stop = True
         self.thread.join()
         self.midi_in.close()
         self.midi_out.close()
@@ -36,7 +36,6 @@ class FighterTwister:
 
     def set_bank(self, bank):
         self.current_bank = bank
-        # self.midi_out.write_short(179, self.current_bank, 127)
         self.midi_out.write_short(179, self.current_bank, 127)
 
     def next_bank(self):
@@ -46,7 +45,6 @@ class FighterTwister:
         self.set_bank((self.current_bank-1) % 4)
 
     def parse_input(self, message, timestamp):
-        # print(message)
         status = message[0]
         if status == 176:
             enc_idx = np.unravel_index(message[1], self.encoders.shape)
@@ -66,20 +64,20 @@ class FighterTwister:
 
     def add_task_at(self, timestamp, function, args=[], kwargs={}):
         task = Task(timestamp, function, args, kwargs)
-        self.queue.add(task)
+        self._queue.add(task)
 
     def add_task_delay(self, delay, function, args=[], kwargs={}):
         self.add_task_at(midi.time()+delay, function, args, kwargs)
 
     def loop(self):
-        while not self.stop:
+        while not self._stop:
             while self.midi_in.poll():
                 message, timestamp = self.midi_in.read(1)[0]
                 self.add_task_at(timestamp, self.parse_input,
                                  [message, timestamp])
 
-            while self.queue and self.queue[0].timestamp < midi.time():
-                task = self.queue.pop(0)
+            while self._queue and self._queue[0].timestamp < midi.time():
+                task = self._queue.pop(0)
                 task.execute()
 
             time.sleep(0.01)
