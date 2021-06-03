@@ -19,19 +19,24 @@ class Encoder(Button):
         self._ft = fightertwister
         self._address = address
 
-        self._value = 0
         self._follow_value = True
         self._extra_values = np.empty(0, float)
         self._on_off = 1
         self._on_brightness = 1
         self._off_brightness = 0.3
-        self._color = None
+
+        self._value = 0
+        self._color = 1
         self._rgb_strobe = 0
         self._rgb_pulse = 0
         self._rgb_brightness = 1
         self._indicator_strobe = 0
         self._indicator_pulse = 0
         self._indicator_brightness = 1
+
+        self._visible_properties = set([
+            'value', 'color', 'rgb_strobe', 'rgb_pulse', 'rgb_brightness',
+            'indicator_strobe', 'indicator_pulse', 'indicator_brightness'])
 
         self._ts_prev_encoder = 0
 
