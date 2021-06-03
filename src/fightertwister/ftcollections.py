@@ -1,5 +1,6 @@
 from __future__ import annotations
 import numpy as np
+from collections.abc import Iterable
 
 from .encoder import Encoder
 from .button import Button
@@ -13,6 +14,9 @@ class EncoderCollection(ObjectCollection, Encoder):
     def __getitem__(self, indices) -> EncoderCollection:
         return super().__getitem__(indices)
 
+    def __iter__(self) -> Iterable[EncoderCollection]:
+        return super().__iter__()
+
 
 class ButtoCollection(ObjectCollection, Button):
     def __init__(self, buttons: np.ndarray):
@@ -20,3 +24,6 @@ class ButtoCollection(ObjectCollection, Button):
 
     def __getitem__(self, indices) -> ButtoCollection:
         return super().__getitem__(indices)
+
+    def __iter__(self) -> Iterable[ButtoCollection]:
+        return super().__iter__()

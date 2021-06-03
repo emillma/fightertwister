@@ -35,8 +35,8 @@ class FtBro(FighterTwister):
         self.selected_node = self.enc_selectors[0, 0]
         self.active_nodes = EncoderCollection(self.selected_node)
 
-        self.encoders.set_extra_values(
-            np.zeros(self.enc_params.shape), _broadcast=False)
+        for i in self.enc_nodes:
+            i.set_extra_values(np.zeros(self.enc_params.shape))
 
         self.nodes_on = np.zeros(self.enc_selectors.shape, int)
         self.selected_for_copy = np.zeros(self.enc_selectors.shape, int)
@@ -69,8 +69,9 @@ class FtBro(FighterTwister):
         self.enc_params.set_color(self.color_param_default)
 
     def _param_enc(self, encoder: Encoder, ts):
-        self.active_nodes.set_extra_values(self.enc_params._value,
-                                           _broadcast=False)
+        for e_v in self.active_nodes.extra_values.ravel():
+            e_v[self.enc_params.get_idx(encoder)] = encoder.value
+        print(self.enc_nodes[0, 0].extra_values)
 
     def node_hold(self, node: Encoder, ts):
         if not self.button_copy.pressed:
