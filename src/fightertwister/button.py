@@ -9,10 +9,12 @@ class Button:
                  delay_click=200,
                  delay_dbclick=200):
 
-        self.ft = fightertwister
         self.pressed = 0
-        self.ts_prev_press = 0
-        self.ts_prev_release = 0
+
+        self._ft = fightertwister
+
+        self._ts_prev_press = 0
+        self._ts_prev_release = 0
 
         self._delay_hold = delay_hold
         self._delay_click = delay_click
@@ -47,7 +49,7 @@ class Button:
     def register_cb_hold(self, callback):
         def _cb_hold(self: Button, ts_eval):
             if (self.pressed
-                    and self.ts_prev_release < ts_eval - self._delay_hold):
+                    and self._ts_prev_release < ts_eval - self._delay_hold):
                 callback(self, ts_eval)
         self._cbs_hold.add(_cb_hold)
 
@@ -67,27 +69,27 @@ class Button:
             for cb in self._cbs_press:
                 cb(self, timestamp)
 
-            if self.ts_prev_press > timestamp - self._delay_dbclick:
+            if self._ts_prev_press > timestamp - self._delay_dbclick:
                 for cb in self._cbs_dbclick:
                     cb(self, timestamp)
                 self._prev_press_was_dbclick = True
             ts_eval_hold = timestamp + self._delay_hold
             for cb in self._cbs_hold:
-                self.ft.do_task_at(ts_eval_hold, cb, *[self, ts_eval_hold])
+                self._ft.do_task_at(ts_eval_hold, cb, *[self, ts_eval_hold])
 
-            self.ts_prev_press = timestamp
+            self._ts_prev_press = timestamp
         else:
             self.pressed = 0
             for cb in self._cbs_release:
                 cb(self, timestamp)
             if not self._prev_press_was_dbclick:
-                if self.ts_prev_press > timestamp - self._delay_click:
+                if self._ts_prev_press > timestamp - self._delay_click:
                     for cb in self._cbs_click:
                         cb(self, timestamp)
                 else:
                     for cb in self._cbs_slowclick:
                         cb(self, timestamp)
-            self.ts_prev_release = timestamp
+            self._ts_prev_release = timestamp
             self._prev_press_was_dbclick = False
 
     def clear_cbs_button_press(self):

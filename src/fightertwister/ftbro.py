@@ -46,7 +46,7 @@ class FtBro(FighterTwister):
 
         self.enc_params.register_cb_encoder(self._param_enc)
 
-        self.enc_nodes.register_cb_hold(self.togle_copy_mode)
+        self.enc_nodes.register_cb_press(self.togle_copy_mode)
         self.enc_nodes.register_cb_dbclick(self.toggle_solo)
 
         # self.enc_mic.register_cb_hold(self._selector_select)
@@ -54,12 +54,13 @@ class FtBro(FighterTwister):
         self.button_copy.register_cb_dbclick(self.enable_all_copy)
         self.button_copy.register_cb_click(self.disable_all_copy)
 
-        self.button_params.register_cb_click(lambda *_: self.set_bank(0))
-        self.button_inspect.register_cb_click(lambda *_: self.set_bank(1))
+        self.button_params.register_cb_press(lambda *_: self.set_bank(0))
+        self.button_inspect.register_cb_press(lambda *_: self.set_bank(1))
 
     def __enter__(self):
         super().__enter__()
         self.set_bank(0)
+        # self.encoders.set_follow_value(False)
         self.enc_selectors.set_value(0.3)
         self.enc_selectors.set_on_off(0)
         self.enc_params.set_value(0)
@@ -77,7 +78,7 @@ class FtBro(FighterTwister):
             self.selected_node = node
             self.selected_node.set_color(self.color_node_selected)
             self.active_nodes = EncoderCollection(self.selected_node)
-            self.enc_params.set_value(node.extra_values)
+            self.enc_params.set_value(node._extra_values)
 
     def togle_copy_mode(self, node: Encoder, ts):
         if node is not self.selected_node and self.button_copy.pressed:
@@ -85,7 +86,7 @@ class FtBro(FighterTwister):
                 self.active_nodes = EncoderCollection(
                     [enc for enc in self.active_nodes] + [node])
                 node.set_color(self.color_copy)
-                node.set_extra_values(self.selected_node.extra_values)
+                node.set_extra_values(self.selected_node._extra_values)
             else:
                 self.active_nodes = EncoderCollection(
                     [enc for enc in self.active_nodes if enc is not node])
@@ -102,8 +103,9 @@ class FtBro(FighterTwister):
         self.active_nodes = EncoderCollection(self.selected_node)
 
     def toggle_onoff(self, node: Encoder, ts):
-        on_off = node.on ^ 1
-        node.set_on_off(on_off)
+        if not self.button_copy.pressed:
+            on_off = node.on ^ 1
+            node.set_on_off(on_off)
 
     def toggle_solo(self, node: Encoder, ts):
         node.set_on_off(1)
