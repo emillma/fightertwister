@@ -16,18 +16,23 @@ class Encoder(Button):
         super().__init__(fightertwister,
                          delay_hold, delay_click, delay_dbclick)
 
-        self.on = 1
-
         self._ft = fightertwister
         self._address = address
 
         self._value = 0
+        self._follow_value = True
         self._extra_values = np.empty(0, float)
-
+        self._on_off = 1
         self._on_brightness = 1
         self._off_brightness = 0.3
+        self._color = None
+        self._rgb_strobe = 0
+        self._rgb_pulse = 0
+        self._rgb_brightness = 1
+        self._indicator_strobe = 0
+        self._indicator_pulse = 0
+        self._indicator_brightness = 1
 
-        self._follow_value = True
         self._ts_prev_encoder = 0
 
         self._cbs_encoder = set()
@@ -41,11 +46,84 @@ class Encoder(Button):
         return self._value * self.on
 
     @ property
+    def on(self):
+        return self._on_off
+
+    @ property
     def extra_values(self):
         if callable(self._extra_values):
             return self._extra_values()
         else:
             return self._extra_values
+
+    def set_value(self, value):
+        self._value = clamp(value, 0, 1)
+        if self._follow_value:
+            self._show_value(self._value)
+
+    def set_follow_value(self, follow_value):
+        self._follow_value = follow_value
+
+    def set_extra_values(self, extra_values):
+        self._extra_values = extra_values
+
+    def set_on_off(self, on):
+        self._on_off = on
+        if self.on:
+            for cb in self._cbs_on:
+                cb(self, midi.time())
+        else:
+            for cb in self._cbs_off:
+                cb(self, midi.time())
+
+    def set_on_brightness(self, brightenss):
+        self._on_brightness = brightenss
+
+    def set_off_brightness(self, brightenss):
+        self._off_brightness = brightenss
+
+    def set_color(self, color):
+        self._color = color
+        """ 0 to 127"""
+        message = int(clamp(color, 0, 127)+0.5)
+        self._ft.midi_out.write_short(177, self._address, message)
+
+    def set_rgb_strobe(self, strobe):
+        self._rgb_strobe = strobe
+        """ 0 to 8"""
+        message = int(clamp(strobe, 0, 8) + 0 + 0.5)
+        self._ft.midi_out.write_short(178, self._address, message)
+
+    def set_rgb_pulse(self, pulse):
+        self._rgb_pulse = pulse
+        """ 0 to 7"""
+        message = int(clamp(pulse, 0, 7) + 9 + 0.5)
+        self._ft.midi_out.write_short(178, self._address, message)
+
+    def set_rgb_brightness(self, brightness):
+        self._rgb_brightness = brightness
+        """ 0. to 1."""
+        message = int(clamp(brightness, 0, 1)*30+0.5) + 17
+        self._ft.midi_out.write_short(178, self._address, message)
+
+    def set_indicator_strobe(self, strobe):
+        self._indicator_strobe = strobe
+        """ 0 to 8"""
+        message = int(clamp(strobe, 0, 8) + 48 + 0.5)
+        self._ft.midi_out.write_short(178, self._address, message)
+
+    def set_indicator_pulse(self, pulse):
+        """ 0 to 8"""
+        self._indicator_pulse = pulse
+        message = int(clamp(pulse, 0, 8) + 56 + 0.5)
+        message = message if message != 56 else 48
+        self._ft.midi_out.write_short(178, self._address, message)
+
+    def set_indicator_brightness(self, brightness):
+        """ 0. to 1."""
+        self._indicator_brightness = brightness
+        message = int(clamp(brightness, 0, 1)*30+0.5) + 65
+        self._ft.midi_out.write_short(178, self._address, message)
 
     def register_cb_encoder(self, callback):
         self._cbs_encoder.add(callback)
@@ -56,12 +134,6 @@ class Encoder(Button):
     def register_cb_off(self, callback):
         self._cbs_encoder.add(callback)
 
-    def _cb_encoder_base(self, value, timestamp):
-        self.set_value(round(self._value + (value-64)/1000, 3))
-        for cb in self._cbs_encoder:
-            cb(self, timestamp)
-        self._ts_prev_encoder = timestamp
-
     def clear_cbs_encoder(self, callback):
         self._cbs_encoder.clear()
 
@@ -71,68 +143,12 @@ class Encoder(Button):
     def clear_cbs_off(self, callback):
         self._cbs_off.clear()
 
-    def set_value(self, value):
-        self._value = clamp(value, 0, 1)
-        if self._follow_value:
-            self.show_value(self._value)
-
-    def set_follow_value(self, follow_value):
-        self._follow_value = follow_value
-
-    def show_value(self, value):
+    def _show_value(self, value):
         self._ft.midi_out.write_short(
             176, self._address, to7bit(clamp(value, 0, 1)))
 
-    def set_extra_values(self, extra_values):
-        self._extra_values = extra_values
-
-    def set_on_off(self, on):
-        self.on = on
-        if self.on:
-            for cb in self._cbs_on:
-                cb(self, midi.time())
-        else:
-            for cb in self._cbs_off:
-                cb(self, midi.time())
-
-    def set_on_brightness(self, brightenss):
-        self.on_brightenss = brightenss
-
-    def set_off_brightness(self, brightenss):
-        self.off_brightenss = brightenss
-
-    def set_color(self, color):
-        """ 0 to 127"""
-        color = int(clamp(color, 0, 127)+0.5)
-        self._ft.midi_out.write_short(177, self._address, color)
-
-    def set_rgb_strobe(self, strobe):
-        """ 0 to 8"""
-        strobe = int(clamp(strobe, 0, 8) + 0 + 0.5)
-        self._ft.midi_out.write_short(178, self._address, strobe)
-
-    def set_rgb_pulse(self, pulse):
-        """ 0 to 7"""
-        pulse = int(clamp(pulse, 0, 7) + 9 + 0.5)
-        self._ft.midi_out.write_short(178, self._address, pulse)
-
-    def set_rgb_brightness(self, brightness):
-        """ 0. to 1."""
-        brightness = int(clamp(brightness, 0, 1)*30+0.5) + 17
-        self._ft.midi_out.write_short(178, self._address, brightness)
-
-    def set_indicator_strobe(self, strobe):
-        """ 0 to 8"""
-        strobe = int(clamp(strobe, 0, 8) + 48 + 0.5)
-        self._ft.midi_out.write_short(178, self._address, strobe)
-
-    def set_indicator_pulse(self, pulse):
-        """ 0 to 8"""
-        pulse = int(clamp(pulse, 0, 8) + 56 + 0.5)
-        pulse = pulse if pulse != 56 else 48
-        self._ft.midi_out.write_short(178, self._address, pulse)
-
-    def set_indicator_brightness(self, brightness):
-        """ 0. to 1."""
-        brightness = int(clamp(brightness, 0, 1)*30+0.5) + 65
-        self._ft.midi_out.write_short(178, self._address, brightness)
+    def _cb_encoder_base(self, value, timestamp):
+        self.set_value(round(self._value + (value-64)/1000, 3))
+        for cb in self._cbs_encoder:
+            cb(self, timestamp)
+        self._ts_prev_encoder = timestamp

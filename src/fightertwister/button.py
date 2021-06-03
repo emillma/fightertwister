@@ -23,12 +23,9 @@ class Button:
 
         self._cbs_press = set()
         self._cbs_release = set()
-
         self._cbs_hold = set()
-
         self._cbs_click = set()
         self._cbs_slowclick = set()
-
         self._cbs_dbclick = set()
 
     def set_delay_hold(self, delay):
@@ -62,6 +59,24 @@ class Button:
     def register_cb_dbclick(self, callback):
         self._cbs_dbclick.add(callback)
 
+    def clear_cbs_button_press(self):
+        self._cbs_press.clear()
+
+    def clear_cbs_button_release(self):
+        self._cbs_release.clear()
+
+    def clear_cbs_button_hold(self):
+        self._cbs_hold.clear()
+
+    def clear_cbs_button_click(self):
+        self._cbs_click.clear()
+
+    def clear_cbs_button_slowclick(self):
+        self._cbs_slowclick.clear()
+
+    def clear_cbs_button_dbclick(self):
+        self._cbs_dbclick.clear()
+
     def _cb_button_base(self, value, timestamp):
         self.last_sent_button = timestamp
         if value:
@@ -91,21 +106,3 @@ class Button:
                         cb(self, timestamp)
             self._ts_prev_release = timestamp
             self._prev_press_was_dbclick = False
-
-    def clear_cbs_button_press(self):
-        self._cbs_press.clear()
-
-    def clear_cbs_button_release(self):
-        self._cbs_release.clear()
-
-    def clear_cbs_button_hold(self):
-        self._cbs_hold.clear()
-
-    def clear_cbs_button_click(self):
-        self._cbs_click.clear()
-
-    def clear_cbs_button_slowclick(self):
-        self._cbs_slowclick.clear()
-
-    def clear_cbs_button_dbclick(self):
-        self._cbs_dbclick.clear()
