@@ -1,3 +1,4 @@
+from typing import Iterable
 import numpy as np
 from fightertwister.button import Button
 
@@ -22,50 +23,33 @@ class Slots:
         return self._objects[indices]
 
     def __setitem__(self, indices, items):
-        if isinstance(items, ObjectCollection):
-            self._objects[indices] = items._objects
-        else:
-            self._objects[indices] = items
+        self._objects[indices]
 
+
+class EncoderSlots:
+    def __init__(self, encoders: EncoderCollection):
+        self._encoders = encoders
+        self._addresses = np.arange(64).reshape(4, 4, 4)
         self._mapping = dict(zip(self._addresses.ravel(),
-                                 self._objects.ravel()))
-
-
-class EncoderSlots(Slots):
-    def __init__(self, objects=None):
-        super().__init__(np.empty((4, 4, 4), object),
-                         np.arange(64).reshape(4, 4, 4))
-        if objects:
-            self._objects = objects
+                                 self._encoders.ravel()))
+        self._encoders._add_address(self._addresses)
 
     def get_address(self, address) -> Encoder:
-        return super().get_address(address)
+        return self._mapping[address]
 
     def __getitem__(self, indices) -> Encoder:
-        return super().__getitem__(indices)
+        return self._encoders[indices]
 
     def __setitem__(self, indices, items):
-        iterator = zip(self._objects[indices].ravel(),
-                       self._addresses[indices].ravel())
-        for object, address in iterator:
-            if isinstance(object, Encoder):
-                object._addresses.remove(address)
-
-        super().__setitem__(indices, items)
-
-        iterator = zip(self._objects[indices].ravel(),
-                       self._addresses[indices].ravel())
-        for object, address in iterator:
-            if isinstance(object, Encoder):
-                object._addresses.add(address)
+        self._encoders[indices]._remove_address[self._addresses[indices]]
+        self._encoders[indices] = items
+        self._encoders[indices]._add_address[self._addresses[indices]]
 
 
 class SidebuttonSlots(Slots):
-    def __init__(self, objects=None):
-        super().__init__(np.empty((4, 3, 2), object),
+    def __init__(self, sidebuttons):
+        super().__init__(sidebuttons,
                          np.arange(8, 32).reshape(4, 2, 3).transpose(0, 2, 1))
-        if objects:
-            self._objects = objects
 
     def get_address(self, address) -> Button:
         return super().get_address(address)

@@ -40,8 +40,8 @@ class Encoder(Button):
         self._indicator_brightness = 1
 
         self._visible_properties = set([
-            'value', 'color', 'rgb_strobe', 'rgb_pulse', 'rgb_brightness',
-            'indicator_strobe', 'indicator_pulse', 'indicator_brightness'])
+            '_value', '_color', '_rgb_strobe', '_rgb_pulse', '_rgb_brightness',
+            '_indicator_strobe', '_indicator_pulse', '_indicator_brightness'])
 
         self._ts_prev_encoder = 0
 
@@ -169,3 +169,9 @@ class Encoder(Button):
             else:
                 self._ft.midi_out.write(
                     [[channel, address, message], timestamp])
+
+    def _add_address(self, address):
+        self._addresses.add(address)
+
+    def _remove_address(self, address):
+        self._addresses.remove(address)

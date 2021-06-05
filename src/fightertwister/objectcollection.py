@@ -2,13 +2,17 @@ import numpy as np
 
 
 class ObjectCollection:
-    def __init__(self,
-                 objects: np.ndarray):
-        if not isinstance(objects, np.ndarray):
-            objects = np.array([objects], object)
-        self._objects = objects
-        self._indices = self._get_indices(objects)
-        self._idx_table = dict(zip(objects.ravel(), self._indices.ravel()))
+    def __init__(self, objects):
+
+        if isinstance(objects, ObjectCollection):
+            self._objects = objects._objects
+        elif not isinstance(objects, np.ndarray):
+            self._objects = np.array([objects], object)
+        else:
+            self._objects = objects
+        self._indices = self._get_indices(self._objects)
+        self._idx_table = dict(zip(self._objects.ravel(),
+                                   self._indices.ravel()))
 
     @ property
     def shape(self):
@@ -28,6 +32,9 @@ class ObjectCollection:
         item = self._objects[indices]
         return (item if not isinstance(item, np.ndarray)
                 else ObjectCollection(item))
+
+    def __setitem__(self, indices, items):
+        self._objects[indices] = items
 
     def __iter__(self):
         # nditer does not work on empty array

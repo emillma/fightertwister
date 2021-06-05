@@ -11,18 +11,17 @@ from .slots import EncoderSlots, SidebuttonSlots
 
 
 class FighterTwister:
-    def __init__(self, init_encoders=True):
+    def __init__(self):
 
-        self.encoder_slots = EncoderSlots()
-        self.sidebutton_slots = SidebuttonSlots()
+        encoders = np.array([Encoder(self)for i in range(64)]
+                            ).reshape(4, 4, 4)
+        self.encoders = EncoderCollection(encoders)
+        self.encoder_slots = EncoderSlots(self.encoders)
 
-        if init_encoders:
-            encoders = np.array([Encoder(self) for i in range(64)])
-            self.encoders = EncoderCollection(encoders.reshape(4, 4, 4))
-            sidebuttons = np.array([Button(self) for i in range(8, 32)])
-            self.sidebuttons = ButtoCollection(sidebuttons.reshape(4, 3, 2))
-            self.encoder_slots[:] = self.encoders
-            self.sidebutton_slots[:] = self.sidebuttons
+        sidebuttons = np.array([Button(self)for i in range(8, 32)]
+                               ).reshape(4, 3, 2)
+        self.sidebuttons = ButtoCollection(sidebuttons)
+        self.sidebutton_slots = SidebuttonSlots(self.sidebuttons)
 
         self.current_bank = 0
 
