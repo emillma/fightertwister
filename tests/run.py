@@ -6,13 +6,17 @@ from fightertwister import (FighterTwister, Encoder, Button, ft_colors, FtBro,
                             heat_color)
 
 
-ft = FtBro()
-# ft = FighterTwister()
-# ft.encoders.register_cb_hold(lambda *_: print('hello'))
-# sb = Encoder(ft)
+# ft = FtBro()
+ft = FighterTwister()
+ft.sidebuttons.register_cb_press(lambda *_: ft.next_bank())
+sb = Encoder(ft)
+sb.register_cb_press(lambda *_: print('hello'))
 # ft.encoder_slots[0, :, 0] = sb
 
 with ft:
+    sb.set_color(ft_colors.cyan)
+    time.sleep(1)
+    ft.encoder_slots[1, 0, :] = sb
     # for i in range(16):
     #     ft.encoders.ravel()[i].set_color(ft_colors.red)
     #     time.sleep(0.1)

@@ -43,6 +43,11 @@ class FighterTwister:
 
     def set_bank(self, bank):
         self.current_bank = bank
+        done = set()
+        for encoder in self.encoder_slots[bank]:
+            if encoder not in done:
+                encoder._show_properties()
+            done.add(encoder)
         self.midi_out.write_short(179, self.current_bank, 127)
 
     def next_bank(self):

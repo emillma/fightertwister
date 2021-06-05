@@ -100,12 +100,14 @@ class Encoder(Button):
 
     def set_rgb_strobe(self, strobe):
         self._rgb_strobe = strobe
+        self._rgb_pulse = 0
         """ 0 to 8"""
         message = int(clamp(strobe, 0, 8) + 0 + 0.5)
         self._send_midi(178, message)
 
     def set_rgb_pulse(self, pulse):
         self._rgb_pulse = pulse
+        self._rgb_strobe = 0
         """ 0 to 7"""
         message = int(clamp(pulse, 0, 7) + 9 + 0.5)
         self._send_midi(178, message)
@@ -118,6 +120,7 @@ class Encoder(Button):
 
     def set_indicator_strobe(self, strobe):
         self._indicator_strobe = strobe
+        self._indicator_pulse = 0
         """ 0 to 8"""
         message = int(clamp(strobe, 0, 8) + 48 + 0.5)
         self._send_midi(178, message)
@@ -125,6 +128,7 @@ class Encoder(Button):
     def set_indicator_pulse(self, pulse):
         """ 0 to 8"""
         self._indicator_pulse = pulse
+        self._indicator_strobe = 0
         message = int(clamp(pulse, 0, 8) + 56 + 0.5)
         message = message if message != 56 else 48
         self._send_midi(178, message)
@@ -164,6 +168,9 @@ class Encoder(Button):
 
     def _send_midi(self, channel, message, timestamp=None):
         for address in self._addresses or []:
+            # print(address//16)
+            if address//16 != self._ft.current_bank:  # skip stuff not visible
+                continue
             if timestamp is None:
                 self._ft.midi_out.write_short(channel, address, message)
             else:
@@ -175,3 +182,22 @@ class Encoder(Button):
 
     def _remove_address(self, address):
         self._addresses.remove(address)
+
+    def _show_properties(self):
+        self.set_rgb_brightness(self._rgb_brightness)
+        self.set_indicator_brightness(self._indicator_brightness)
+
+        self._show_value(self._value)
+        self.set_color(self._color)
+        if self._rgb_strobe:
+            self.set_rgb_strobe(self._rgb_strobe)
+        else:
+            self.set_rgb_pulse(self._rgb_pulse)
+
+        if self._indicator_strobe:
+            self.set_indicator_strobe(self._indicator_strobe)
+        else:
+            self.set_indicator_pulse(self._indicator_pulse)
+
+    def __repr__(self):
+        return f'Encoder connected to {self._addresses}'

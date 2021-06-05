@@ -7,25 +7,6 @@ from .ftcollections import EncoderCollection, ButtoCollection
 from .objectcollection import ObjectCollection
 
 
-class Slots:
-    def __init__(self, objects, addresses):
-        self._objects = objects
-        self._addresses = addresses
-        self._mapping = dict(zip(self._addresses.ravel(),
-                                 self._objects.ravel()))
-
-        self._shape = self._objects.shape
-
-    def get_address(self, address):
-        return self._mapping[address]
-
-    def __getitem__(self, indices):
-        return self._objects[indices]
-
-    def __setitem__(self, indices, items):
-        self._objects[indices]
-
-
 class EncoderSlots:
     def __init__(self, encoders: EncoderCollection):
         self._encoders = encoders
@@ -41,18 +22,30 @@ class EncoderSlots:
         return self._encoders[indices]
 
     def __setitem__(self, indices, items):
-        self._encoders[indices]._remove_address[self._addresses[indices]]
+        self._encoders[indices]._remove_address(self._addresses[indices])
         self._encoders[indices] = items
-        self._encoders[indices]._add_address[self._addresses[indices]]
+        self._encoders[indices]._add_address(self._addresses[indices])
+        self._mapping = dict(zip(self._addresses.ravel(),
+                                 self._encoders.ravel()))
+        done = set()
+        for encoder in self._encoders[indices]:
+            if encoder not in done:
+                encoder._show_properties()
+            done.add(encoder)
 
 
-class SidebuttonSlots(Slots):
+class SidebuttonSlots:
     def __init__(self, sidebuttons):
-        super().__init__(sidebuttons,
-                         np.arange(8, 32).reshape(4, 2, 3).transpose(0, 2, 1))
+        self._sidebuttons = sidebuttons
+        self._addresses = np.arange(8, 32).reshape(4, 2, 3).transpose(0, 2, 1)
+        self._mapping = dict(zip(self._addresses.ravel(),
+                                 self._sidebuttons.ravel()))
 
     def get_address(self, address) -> Button:
-        return super().get_address(address)
+        return self._mapping[address]
 
     def __getitem__(self, indices) -> Button:
-        return super().__getitem__(indices)
+        return self._sidebuttons[indices]
+
+    def __setitem__(self, indices, items):
+        self._sidebuttons[indices] = items
