@@ -39,7 +39,8 @@ class Encoder(Button):
         self._indicator_pulse = 0
         self._indicator_brightness = 1
 
-        self._visible_properties = set([
+        self._properties = dict()
+        self._visible_propertie_keys = set([
             '_value', '_color', '_rgb_strobe', '_rgb_pulse', '_rgb_brightness',
             '_indicator_strobe', '_indicator_pulse', '_indicator_brightness'])
 
@@ -65,6 +66,12 @@ class Encoder(Button):
             return self._extra_values()
         else:
             return self._extra_values
+
+    def set_property(self, key, value):
+        self._properties[key] = value
+
+    def get_property(self, key):
+        return self._properties[key]
 
     def set_value(self, value):
         self._value = clamp(value, 0, 1)

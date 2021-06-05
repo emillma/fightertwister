@@ -90,6 +90,7 @@ class FighterTwister:
                 task = self._queue.pop(0)
                 task.execute()
 
+            # Store messages and parse them here
             time.sleep(0.01)
 
     def run(self):
