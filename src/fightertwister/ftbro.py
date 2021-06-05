@@ -71,13 +71,13 @@ class FtBro(FighterTwister):
     def _param_enc(self, encoder: Encoder, ts):
         for e_v in self.active_nodes.extra_values.ravel():
             e_v[self.enc_params.get_idx(encoder)] = encoder.value
-        print(self.enc_nodes[0, 0].extra_values)
 
     def node_hold(self, node: Encoder, ts):
         if not self.button_copy.pressed:
             self.active_nodes.set_color(self.color_node_default)
             self.selected_node = node
             self.selected_node.set_color(self.color_node_selected)
+
             self.active_nodes = EncoderCollection(self.selected_node)
             self.enc_params.set_value(node._extra_values)
 

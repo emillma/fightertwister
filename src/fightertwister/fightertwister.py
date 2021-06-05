@@ -7,16 +7,25 @@ from .ftcollections import EncoderCollection, ButtoCollection
 from .encoder import Encoder
 from .button import Button
 from .utils import Task
+from .slots import EncoderSlots, SidebuttonSlots
 
 
 class FighterTwister:
-    def __init__(self):
-        encoders = np.array([Encoder(self, i) for i in range(64)])
-        self.encoders = EncoderCollection(encoders.reshape(4, 4, 4))
+    def __init__(self, init_encoders=True):
 
-        sidebuttons = np.array([Button(self) for i in range(8, 32)])
-        self.sidebuttons = ButtoCollection(sidebuttons.reshape(4, 3, 2))
+        self.encoder_slots = EncoderSlots()
+        self.sidebutton_slots = SidebuttonSlots()
+
+        if init_encoders:
+            encoders = np.array([Encoder(self, i) for i in range(64)])
+            self.encoders = EncoderCollection(encoders.reshape(4, 4, 4))
+            sidebuttons = np.array([Button(self) for i in range(8, 32)])
+            self.sidebuttons = ButtoCollection(sidebuttons.reshape(4, 3, 2))
+            self.encoder_slots[:] = self.encoders
+            self.sidebutton_slots[:] = self.sidebuttons
+
         self.current_bank = 0
+
         self._queue = SortedKeyList([], key=lambda x: x.timestamp)
         self._stop = False
 
@@ -46,19 +55,15 @@ class FighterTwister:
     def parse_input(self, message, timestamp):
         status = message[0]
         if status == 176:
-            enc_idx = np.unravel_index(message[1], self.encoders.shape)
-            self.encoders[enc_idx]._cb_encoder_base(
+            self.encoder_slots.get_address(message[1])._cb_encoder_base(
                 message[2], timestamp)
 
         if status == 177:
-            enc_idx = np.unravel_index(message[1], self.encoders.shape)
-            self.encoders[enc_idx]._cb_button_base(
+            self.encoder_slots.get_address(message[1])._cb_button_base(
                 message[2], timestamp)
 
         if status == 179:
-            enc_idx = np.unravel_index(message[1]-8, (4, 2, 3))
-            enc_idx = (enc_idx[0], enc_idx[2], enc_idx[1])
-            self.sidebuttons[enc_idx]._cb_button_base(
+            self.sidebutton_slots.get_address(message[1])._cb_button_base(
                 message[2], timestamp)
 
     def do_task_at(self, timestamp, function, *args, **kwargs):
