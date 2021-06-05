@@ -39,6 +39,9 @@ class Encoder(Button):
         self._indicator_pulse = 0
         self._indicator_brightness = 1
 
+        self._rgb_state = 47
+        self._indicator_state = 95
+
         self._properties = dict()
         self._visible_propertie_keys = set([
             '_value', '_color', '_rgb_strobe', '_rgb_pulse', '_rgb_brightness',
@@ -111,6 +114,7 @@ class Encoder(Button):
         """ 0 to 8"""
         message = int(clamp(strobe, 0, 8) + 0 + 0.5)
         self._send_midi(178, message)
+        self._rgb_state = message
 
     def set_rgb_pulse(self, pulse):
         self._rgb_pulse = pulse
@@ -118,12 +122,14 @@ class Encoder(Button):
         """ 0 to 7"""
         message = int(clamp(pulse, 0, 7) + 9 + 0.5)
         self._send_midi(178, message)
+        self._rgb_state = message
 
     def set_rgb_brightness(self, brightness):
         self._rgb_brightness = brightness
         """ 0. to 1."""
         message = int(clamp(brightness, 0, 1)*30+0.5) + 17
         self._send_midi(178, message)
+        self._rgb_state = message
 
     def set_indicator_strobe(self, strobe):
         self._indicator_strobe = strobe
@@ -131,20 +137,22 @@ class Encoder(Button):
         """ 0 to 8"""
         message = int(clamp(strobe, 0, 8) + 48 + 0.5)
         self._send_midi(178, message)
+        self._indicator_state = message
 
     def set_indicator_pulse(self, pulse):
         """ 0 to 8"""
         self._indicator_pulse = pulse
-        self._indicator_strobe = 0
         message = int(clamp(pulse, 0, 8) + 56 + 0.5)
         message = message if message != 56 else 48
         self._send_midi(178, message)
+        self._indicator_state = message
 
     def set_indicator_brightness(self, brightness):
         """ 0. to 1."""
         self._indicator_brightness = brightness
         message = int(clamp(brightness, 0, 1)*30+0.5) + 65
         self._send_midi(178, message)
+        self._indicator_state = message
 
     def register_cb_encoder(self, callback):
         self._cbs_encoder.add(callback)
@@ -191,20 +199,11 @@ class Encoder(Button):
         self._addresses.remove(address)
 
     def _show_properties(self):
-        self.set_rgb_brightness(self._rgb_brightness)
-        self.set_indicator_brightness(self._indicator_brightness)
-
         self._show_value(self._value)
         self.set_color(self._color)
-        if self._rgb_strobe:
-            self.set_rgb_strobe(self._rgb_strobe)
-        else:
-            self.set_rgb_pulse(self._rgb_pulse)
 
-        if self._indicator_strobe:
-            self.set_indicator_strobe(self._indicator_strobe)
-        else:
-            self.set_indicator_pulse(self._indicator_pulse)
+        self._send_midi(178, self._rgb_state)
+        self._send_midi(178, self._indicator_state)
 
     def __repr__(self):
         return f'Encoder connected to {self._addresses}'
