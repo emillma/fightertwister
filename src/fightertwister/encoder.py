@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 class Encoder(Button):
     def __init__(self, fightertwister: 'FighterTwister',
+                 on_brightness=1,
+                 off_brightness=0.3,
                  delay_hold=300,
                  delay_click=200,
                  delay_dbclick=200):
@@ -25,8 +27,8 @@ class Encoder(Button):
         self._follow_value = True
         self._extra_values = np.empty(0, float)
         self._on_off = 1
-        self._on_brightness = 1
-        self._off_brightness = 0.3
+        self._on_brightness = on_brightness
+        self._off_brightness = off_brightness
 
         self._value = 0
         self._color = 1

@@ -17,7 +17,7 @@ class FighterTwister:
         self.sidebutton_slots = SidebuttonSlots()
 
         if init_encoders:
-            encoders = np.array([Encoder(self, i) for i in range(64)])
+            encoders = np.array([Encoder(self) for i in range(64)])
             self.encoders = EncoderCollection(encoders.reshape(4, 4, 4))
             sidebuttons = np.array([Button(self) for i in range(8, 32)])
             self.sidebuttons = ButtoCollection(sidebuttons.reshape(4, 3, 2))
@@ -82,7 +82,6 @@ class FighterTwister:
                 message, timestamp = self.midi_in.read(1)[0]
                 self.do_task_at(timestamp, self.parse_input,
                                 *[message, timestamp])
-
             while self._queue and self._queue[0].timestamp < midi.time():
                 task = self._queue.pop(0)
                 task.execute()

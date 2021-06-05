@@ -63,7 +63,7 @@ class EncoderSlots(Slots):
 class SidebuttonSlots(Slots):
     def __init__(self, objects=None):
         super().__init__(np.empty((4, 3, 2), object),
-                         np.arange(24).reshape(4, 2, 3).transpose(0, 2, 1))
+                         np.arange(8, 32).reshape(4, 2, 3).transpose(0, 2, 1))
         if objects:
             self._objects = objects
 
