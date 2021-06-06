@@ -15,7 +15,7 @@ class Encoder(Button):
     def __init__(self, fightertwister: 'FighterTwister',
                  on_brightness=1,
                  off_brightness=0.3,
-                 delay_hold=300,
+                 delay_hold=250,
                  delay_click=200,
                  delay_dbclick=200):
         super().__init__(fightertwister,
@@ -28,7 +28,6 @@ class Encoder(Button):
         self.default_color = ft_colors.blue
 
         self._follow_value = True
-        self._extra_values = np.empty(0, float)
         self._on_off = 1
         self._on_brightness = on_brightness
         self._off_brightness = off_brightness
@@ -65,13 +64,6 @@ class Encoder(Button):
     @ property
     def on(self):
         return self._on_off
-
-    @ property
-    def extra_values(self):
-        if callable(self._extra_values):
-            return self._extra_values(self)
-        else:
-            return self._extra_values
 
     def set_property(self, key, value):
         self._properties[key] = value
