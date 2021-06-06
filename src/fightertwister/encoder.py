@@ -1,6 +1,7 @@
 import numpy as np
 from pygame import midi
 from collections.abc import Iterable
+from copy import deepcopy
 
 from .utils import to7bit, clamp
 from .button import Button
@@ -66,7 +67,7 @@ class Encoder(Button):
     @ property
     def extra_values(self):
         if callable(self._extra_values):
-            return self._extra_values()
+            return self._extra_values(self)
         else:
             return self._extra_values
 
@@ -182,14 +183,16 @@ class Encoder(Button):
         self._ts_prev_encoder = timestamp
 
     def _send_midi(self, channel, message, timestamp=None):
+        if self._ft._midi_out is None:
+            return
         for address in self._addresses or []:
             # print(address//16)
             if address//16 != self._ft.current_bank:  # skip stuff not visible
                 continue
             if timestamp is None:
-                self._ft.midi_out.write_short(channel, address, message)
+                self._ft._midi_out.write_short(channel, address, message)
             else:
-                self._ft.midi_out.write(
+                self._ft._midi_out.write(
                     [[channel, address, message], timestamp])
 
     def _add_address(self, address):
@@ -204,6 +207,9 @@ class Encoder(Button):
 
         self._send_midi(178, self._rgb_state)
         self._send_midi(178, self._indicator_state)
+
+    def copy(self):
+        return deepcopy(self)
 
     def __repr__(self):
         return f'Encoder connected to {self._addresses}'

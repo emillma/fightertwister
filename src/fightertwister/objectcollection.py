@@ -31,10 +31,13 @@ class ObjectCollection:
     def __getitem__(self, indices):
         item = self._objects[indices]
         return (item if not isinstance(item, np.ndarray)
-                else ObjectCollection(item))
+                else type(self)(item))
 
     def __setitem__(self, indices, items):
-        self._objects[indices] = items
+        if isinstance(items, ObjectCollection):
+            self._objects[indices] = items._objects
+        else:
+            self._objects[indices] = items
 
     def __iter__(self):
         # nditer does not work on empty array
