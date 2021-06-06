@@ -3,7 +3,7 @@ from pygame import midi
 from collections.abc import Iterable
 from copy import deepcopy
 
-from .utils import to7bit, clamp
+from .utils import ft_colors, to7bit, clamp
 from .button import Button
 
 from typing import TYPE_CHECKING
@@ -24,6 +24,8 @@ class Encoder(Button):
         self._ft = fightertwister
 
         self._addresses = set([])
+
+        self.default_color = ft_colors.blue
 
         self._follow_value = True
         self._extra_values = np.empty(0, float)
@@ -108,6 +110,9 @@ class Encoder(Button):
         """ 0 to 127"""
         message = int(clamp(color, 0, 127)+0.5)
         self._send_midi(177, message)
+
+    def set_default_color(self, color):
+        self.default_color = color
 
     def set_rgb_strobe(self, strobe):
         self._rgb_strobe = strobe
