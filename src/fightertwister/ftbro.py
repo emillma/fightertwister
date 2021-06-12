@@ -119,3 +119,7 @@ class FtBro(FighterTwister):
     def toggle_solo(self, node: Encoder, ts):
         node.set_on_off(1)
         [i.set_on_off(0) for i in self.nodes if i is not node]
+
+    def get_node_values(self, i):
+        node = self.nodes[np.unravel_index(i, self.nodes.shape)]
+        return node.value, node.get_property('params').value
