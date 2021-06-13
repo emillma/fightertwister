@@ -50,4 +50,4 @@ def heat_color(value):
 
 
 def to_range(value, start, stop):
-    return value/(stop-start) + start
+    return value*(stop-start) + start
