@@ -47,3 +47,7 @@ heat_spline = UnivariateSpline([0, 0.5, 0.6, 1],
 
 def heat_color(value):
     return int(heat_spline(value)+0.5)
+
+
+def to_range(value, start, stop):
+    return value/(stop-start) + start
