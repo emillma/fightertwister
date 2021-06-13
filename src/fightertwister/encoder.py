@@ -69,7 +69,7 @@ class Encoder(Button):
         self._properties[key] = value
 
     def get_property(self, key):
-        return self._properties[key]
+        return self._properties.get(key)
 
     def set_value(self, value):
         self._value = clamp(value, 0, 1)
