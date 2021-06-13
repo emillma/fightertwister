@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 
 class Encoder(Button):
+
     def __init__(self, fightertwister: 'FighterTwister',
                  on_brightness=1,
                  off_brightness=0.3,
@@ -28,9 +29,9 @@ class Encoder(Button):
         self.default_color = ft_colors.blue
 
         self._follow_value = True
-        self._on_off = 1
         self._on_brightness = on_brightness
         self._off_brightness = off_brightness
+        self._on_off = 1
 
         self._value = 0
         self._color = 1
@@ -45,18 +46,14 @@ class Encoder(Button):
         self._indicator_state = 95
 
         self._properties = dict()
-        self._visible_propertie_keys = set([
+        self._visible_property_keys = set([
             '_value', '_color', '_rgb_strobe', '_rgb_pulse', '_rgb_brightness',
             '_indicator_strobe', '_indicator_pulse', '_indicator_brightness'])
 
-        self._copy_propertie_keys = self._visible_propertie_keys | set([
-            'default_color', '_follow_value', '_on_off', '_on_brightness',
-            '_off_brightness', '_rgb_state', '_indicator_state',
-            '_ts_prev_encoder', '_cbs_encoder', '_cbs_on', '_cbs_off',
-            '_properties', 'pressed', '_ts_prev_press', '_ts_prev_release',
-            '_delay_hold', '_delay_click', '_delay_dbclick',
-            '_prev_press_was_dbclick', '_cbs_press', '_cbs_release',
-            '_cbs_hold', '_cbs_click', '_cbs_slowclick', '_cbs_dbclick', ])
+        self._setable_propery_keys = set([key[3:] for key in dir(self)
+                                          if callable(getattr(self, key))
+                                          and key.startswith('set_')
+                                          and key[3:] in vars(self)])
 
         self._ts_prev_encoder = 0
 
@@ -216,8 +213,9 @@ class Encoder(Button):
 
     def copy(self):
         output = Encoder(self._ft)
-        for key in self._copy_propertie_keys:
-            setattr(output, key, copy(getattr(self, key)))
+        for key in vars(self):
+            if key not in ['_ft', '_addresses']:
+                setattr(output, key, copy(getattr(self, key)))
         return output
 
     def __repr__(self):
