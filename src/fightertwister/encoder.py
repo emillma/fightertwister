@@ -53,7 +53,10 @@ class Encoder(Button):
             'default_color', '_follow_value', '_on_off', '_on_brightness',
             '_off_brightness', '_rgb_state', '_indicator_state',
             '_ts_prev_encoder', '_cbs_encoder', '_cbs_on', '_cbs_off',
-            '_properties'])
+            '_properties', 'pressed', '_ts_prev_press', '_ts_prev_release',
+            '_delay_hold', '_delay_click', '_delay_dbclick',
+            '_prev_press_was_dbclick', '_cbs_press', '_cbs_release',
+            '_cbs_hold', '_cbs_click', '_cbs_slowclick', '_cbs_dbclick', ])
 
         self._ts_prev_encoder = 0
 
