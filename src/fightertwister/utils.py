@@ -19,6 +19,9 @@ class Task:
     def execute(self):
         return self.function(*self.args, **self.kwargs)
 
+    def __repr__(self) -> str:
+        return f"Task: {self.function.__name__}, {self.args}, {self.kwargs}"
+
 
 class ft_colors:
     red = 85
@@ -36,9 +39,9 @@ class ft_colors:
 
 heat_spline = UnivariateSpline([0, 0.5, 0.6, 1],
                                [ft_colors.blue,
-                               ft_colors.green,
-                               ft_colors.yellow,
-                               ft_colors.red],
+                                ft_colors.green,
+                                ft_colors.yellow,
+                                ft_colors.red],
                                k=1)
 
 

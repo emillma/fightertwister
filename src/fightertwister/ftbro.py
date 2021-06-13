@@ -55,7 +55,6 @@ class FtBro(FighterTwister):
 
     def __enter__(self):
         super().__enter__()
-        self.set_bank(0)
         # self.encoders.set_follow_value(False)
         self.selectors.set_value(0.3)
         self.selectors.set_on_off(1)

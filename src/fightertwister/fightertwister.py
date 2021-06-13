@@ -25,6 +25,9 @@ class FighterTwister:
 
         self.current_bank = 0
 
+        self._check_connection_delay = 1000
+        self._connected = False
+        self._running = False
         self._midi_in = None
         self._midi_out = None
 
@@ -33,8 +36,7 @@ class FighterTwister:
 
     def __enter__(self):
         midi.init()
-        self._midi_in = midi.Input(1, buffer_size=256)
-        self._midi_out = midi.Output(3, buffer_size=256, latency=1)
+        self.try_connect()
         self.run()
 
     def __exit__(self, type, value, traceback):
@@ -43,6 +45,23 @@ class FighterTwister:
         self._midi_in.close()
         self._midi_out.close()
         midi.quit()
+
+    def try_connect(self):
+        if self._connected:
+            return -1
+        midi_objs = [(i, *midi.get_device_info(i))
+                     for i in range(midi.get_count())]
+        ft_in = [mo for mo in midi_objs if mo[2] == b'Midi Fighter Twister'
+                 and mo[3]]
+        ft_out = [mo for mo in midi_objs if mo[2] == b'Midi Fighter Twister'
+                  and mo[4]]
+        if ft_in and ft_out:
+            self._midi_in = midi.Input(ft_in[0][0], buffer_size=256)
+            self._midi_out = midi.Output(
+                ft_out[0][0], buffer_size=256, latency=1)
+            self._connected = True
+            self.set_bank(0)
+            return -1
 
     def set_bank(self, bank):
         self.current_bank = bank
@@ -65,13 +84,15 @@ class FighterTwister:
             self.encoder_slots.get_address(message[1])._cb_encoder_base(
                 message[2], timestamp)
 
-        if status == 177:
+        elif status == 177:
             self.encoder_slots.get_address(message[1])._cb_button_base(
                 message[2], timestamp)
 
-        if status == 179:
+        elif status == 179:
             self.sidebutton_slots.get_address(message[1])._cb_button_base(
                 message[2], timestamp)
+        else:
+            print(message)
 
     def do_task_at(self, timestamp, function, *args, **kwargs):
         task = Task(timestamp, function, args, kwargs)
@@ -85,7 +106,7 @@ class FighterTwister:
         TODO: set rate limit, rgb and indicator brightness
         """
         while not self._stop:
-            while self._midi_in.poll():
+            while self._connected and self._midi_in.poll():
                 message, timestamp = self._midi_in.read(1)[0]
                 self.do_task_at(timestamp, self.parse_input,
                                 *[message, timestamp])
@@ -97,5 +118,6 @@ class FighterTwister:
             time.sleep(0.01)
 
     def run(self):
+        self._running = True
         self.thread = threading.Thread(target=self.loop)
         self.thread.start()
