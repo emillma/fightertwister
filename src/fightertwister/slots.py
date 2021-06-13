@@ -1,8 +1,8 @@
 from typing import Iterable
 import numpy as np
-from fightertwister.button import Button
+from .button import Button
 
-from fightertwister.encoder import Encoder
+from .encoder import Encoder
 from .ftcollections import EncoderCollection, ButtoCollection
 from .objectcollection import ObjectCollection
 

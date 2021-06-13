@@ -1,7 +1,7 @@
 import numpy as np
 from pygame import midi
 from collections.abc import Iterable
-from copy import deepcopy
+from copy import copy
 
 from .utils import ft_colors, to7bit, clamp
 from .button import Button
@@ -48,6 +48,12 @@ class Encoder(Button):
         self._visible_propertie_keys = set([
             '_value', '_color', '_rgb_strobe', '_rgb_pulse', '_rgb_brightness',
             '_indicator_strobe', '_indicator_pulse', '_indicator_brightness'])
+
+        self._copy_propertie_keys = self._visible_propertie_keys | set([
+            'default_color', '_follow_value', '_on_off', '_on_brightness',
+            '_off_brightness', '_rgb_state', '_indicator_state',
+            '_ts_prev_encoder', '_cbs_encoder', '_cbs_on', '_cbs_off',
+            '_properties'])
 
         self._ts_prev_encoder = 0
 
@@ -206,7 +212,10 @@ class Encoder(Button):
         self._send_midi(178, self._indicator_state)
 
     def copy(self):
-        return deepcopy(self)
+        output = Encoder(self._ft)
+        for key in self._copy_propertie_keys:
+            setattr(output, key, copy(getattr(self, key)))
+        return output
 
     def __repr__(self):
         return f'Encoder connected to {self._addresses}'
