@@ -112,6 +112,11 @@ class Encoder(Button):
     def set_default_color(self, color):
         self.default_color = color
 
+    def flash_color(self, color, duration=100):
+        current_color = self._color
+        self.set_color(color)
+        self._ft.do_task_delay(duration, lambda: self.set_color(current_color))
+
     def set_rgb_strobe(self, strobe):
         self._rgb_strobe = strobe
         self._rgb_pulse = 0
