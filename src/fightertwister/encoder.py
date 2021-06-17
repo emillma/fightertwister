@@ -31,7 +31,7 @@ class Encoder(Button):
         self._follow_value = True
         self._on_brightness = on_brightness
         self._off_brightness = off_brightness
-        self._on_off = 1
+        self._on = 1
 
         self._value = 0
         self._color = 1
@@ -41,6 +41,7 @@ class Encoder(Button):
         self._indicator_strobe = 0
         self._indicator_pulse = 0
         self._indicator_brightness = 1
+        self._state = 0
 
         self._rgb_state = 47
         self._indicator_state = 95
@@ -69,53 +70,52 @@ class Encoder(Button):
 
     @ property
     def on(self):
-        return self._on_off
+        return self._on
 
     def set_property(self, key, value):
         self._properties[key] = value
+
+    def set_state(self, state):
+        self._state = state
 
     def get_property(self, key):
         return self._properties.get(key)
 
     def set_value(self, value):
-        self._value = clamp(value, 0, 1)
+        self._value = float(clamp(value, 0, 1))
         if self._follow_value:
-            self._show_value(self._value)
+            self.show_value(self._value)
 
     def set_follow_value(self, follow_value):
-        self._follow_value = follow_value
+        self._follow_value = bool(follow_value)
 
     def set_extra_values(self, extra_values):
         self._extra_values = extra_values
 
-    def set_on_off(self, on):
-        self._on_off = on
+    def set_on(self, on):
+        self._on = on
         if self.on:
             for cb in self._cbs_on:
-                cb(self, midi.time())
+                cb(self, midi.time() if midi.get_init() else 0)
         else:
             for cb in self._cbs_off:
-                cb(self, midi.time())
+                cb(self, midi.time() if midi.get_init() else 0)
 
     def set_on_brightness(self, brightenss):
-        self._on_brightness = brightenss
+        self._on_brightness = float(brightenss)
 
     def set_off_brightness(self, brightenss):
-        self._off_brightness = brightenss
+        self._off_brightness = float(brightenss)
 
     def set_color(self, color):
-        self._color = color
+        self._color = int(color)
         """ 0 to 127"""
-        message = int(clamp(color, 0, 127)+0.5)
-        self._send_midi(177, message)
+        self.show_color(color)
 
-    def set_default_color(self, color):
-        self._default_color = color
-
-    def flash_color(self, color, duration=100):
-        self.set_color(color)
-        self._ft.do_task_delay(
-            duration, lambda: self.set_color(self._default_color))
+    def set_default_color(self, color, show=True):
+        self._default_color = int(color)
+        if show:
+            self.set_color(color)
 
     def set_rgb_strobe(self, strobe):
         self._rgb_strobe = strobe
@@ -181,8 +181,17 @@ class Encoder(Button):
     def clear_cbs_off(self, callback):
         self._cbs_off.clear()
 
-    def _show_value(self, value):
+    def show_value(self, value):
         self._send_midi(176, to7bit(clamp(value, 0, 1)))
+
+    def show_color(self, color):
+        message = int(clamp(color, 0, 127)+0.5)
+        self._send_midi(177, message)
+
+    def flash_color(self, color, duration=100):
+        self.show_color(color)
+        self._ft.do_task_delay(
+            duration, lambda: self.set_color(self._color))
 
     def _cb_encoder_base(self, value, timestamp):
         self.set_value(round(self._value + (value-64)/1000, 3))
@@ -210,7 +219,7 @@ class Encoder(Button):
         self._addresses.remove(address)
 
     def _show_properties(self):
-        self._show_value(self._value)
+        self.show_value(self._value)
         self.set_color(self._color)
 
         self._send_midi(178, self._rgb_state)

@@ -33,6 +33,7 @@ class FighterTwister:
 
         self._queue = SortedKeyList([], key=lambda x: x.timestamp)
         self._stop = False
+        self._last_input = 0
 
     def __enter__(self):
         midi.init()
@@ -41,6 +42,7 @@ class FighterTwister:
 
     def __exit__(self, type, value, traceback):
         self._stop = True
+        self._connected = False
         self.thread.join()
         self._midi_in.close()
         self._midi_out.close()
@@ -79,6 +81,7 @@ class FighterTwister:
         self.set_bank((self.current_bank-1) % 4)
 
     def parse_input(self, message, timestamp):
+        self._last_input = timestamp
         status = message[0]
         if status == 176:
             self.encoder_slots.get_address(message[1])._cb_encoder_base(
@@ -99,7 +102,8 @@ class FighterTwister:
         self._queue.add(task)
 
     def do_task_delay(self, delay, function, *args, **kwargs):
-        self.do_task_at(midi.time()+delay, function, *args, **kwargs)
+        now = midi.time() if midi.get_init() else 0
+        self.do_task_at(now+delay, function, *args, **kwargs)
 
     def loop(self):
         """
@@ -114,6 +118,17 @@ class FighterTwister:
                 task = self._queue.pop(0)
                 task.execute()
 
+            if midi.time() - self._last_input > 20000:
+                self._last_input = midi.time()
+                midi.quit()
+                midi.init()
+                # print(midi.time())
+                self._connected = False
+                self._midi_in.close()
+                self._midi_out.close()
+                self.try_connect()
+                if not self._connected:
+                    time.sleep(20)
             # Store messages and parse them here
             time.sleep(0.01)
 

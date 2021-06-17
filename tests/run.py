@@ -4,7 +4,7 @@ if True:
     sys.path.insert(0, 'src')
 from fightertwister import (FighterTwister, Encoder, Button, ft_colors,
                             heat_color)
-
+from pygame import midi
 
 ft = FighterTwister()
 # ft = FighterTwister()
@@ -22,8 +22,9 @@ with ft:
     #     ft.encoders.ravel()[i].set_color(ft_colors.blue)
 
     # sb.set_color(ft_colors.blue)
-    # sb.set_on_off(1)
-    for i in range(100):
-        ft.encoder_slots[:].flash_color(ft_colors.red)
-        time.sleep(.01)
+    # sb.set_on(1)
+    # for i in range(100):
+    # print(midi.time())
+    # ft.encoder_slots[:].flash_color(ft_colors.red)
+    # time.sleep(.01)
     input()
