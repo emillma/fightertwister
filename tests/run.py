@@ -23,7 +23,7 @@ with ft:
 
     # sb.set_color(ft_colors.blue)
     # sb.set_on_off(1)
-    for i in range(1000):
+    for i in range(100):
         ft.encoder_slots[:].flash_color(ft_colors.red)
-        time.sleep(1)
+        time.sleep(.01)
     input()

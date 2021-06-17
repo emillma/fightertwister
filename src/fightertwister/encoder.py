@@ -191,7 +191,7 @@ class Encoder(Button):
         self._ts_prev_encoder = timestamp
 
     def _send_midi(self, channel, message, timestamp=None):
-        if self._ft._midi_out is None:
+        if self._ft._midi_out is None or not midi.get_init():
             return
         for address in self._addresses or []:
             # print(address//16)
