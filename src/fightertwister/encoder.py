@@ -112,7 +112,7 @@ class Encoder(Button):
         """ 0 to 127"""
         self.show_color(color)
 
-    def set_default_color(self, color, show=True):
+    def set_default_color(self, color, show=False):
         self._default_color = int(color)
         if show:
             self.set_color(color)
@@ -220,7 +220,7 @@ class Encoder(Button):
 
     def _show_properties(self):
         self.show_value(self._value)
-        self.set_color(self._color)
+        self.show_color(self._color)
 
         self._send_midi(178, self._rgb_state)
         self._send_midi(178, self._indicator_state)
