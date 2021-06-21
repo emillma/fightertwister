@@ -210,15 +210,19 @@ class Encoder(Button):
     def _send_midi(self, channel, message, timestamp=None):
         if self._ft._midi_out is None or not midi.get_init():
             return
+
         for address in self._addresses or []:
             # print(address//16)
-            if address//16 != self._ft.current_bank:  # skip stuff not visible
-                continue
-            if timestamp is None:
-                self._ft._midi_out.write_short(channel, address, message)
-            else:
-                self._ft._midi_out.write(
-                    [[channel, address, message], timestamp])
+            try:
+                if address//16 != self._ft.current_bank:  # skip stuff not visible
+                    continue
+                if timestamp is None:
+                    self._ft._midi_out.write_short(channel, address, message)
+                else:
+                    self._ft._midi_out.write(
+                        [[channel, address, message], timestamp])
+            except midi.MidiException:
+                pass
 
     def _add_address(self, address):
         self._addresses.add(address)
