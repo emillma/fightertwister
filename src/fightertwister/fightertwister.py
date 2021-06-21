@@ -62,7 +62,7 @@ class FighterTwister:
             self._midi_out = midi.Output(
                 ft_out[0][0], buffer_size=256, latency=1)
             self._connected = True
-            self.set_bank(0)
+            self.set_bank(self.current_bank)
             return -1
 
     def set_bank(self, bank):
