@@ -163,6 +163,14 @@ class Encoder(Button):
         self._send_midi(178, message)
         self._indicator_state = message
 
+    def set_indicator_state(self, indicator_state):
+        self._indicator_state = indicator_state
+        # TODO call correct function
+
+    def set_rgb_state(self, rgb_state):
+        self._rgb_state = rgb_state
+        # TODO call correct function
+
     def register_cb_encoder(self, callback):
         self._cbs_encoder.add(callback)
 
