@@ -202,7 +202,17 @@ class Encoder(Button):
             duration, lambda: self.set_color(self._color))
 
     def _cb_encoder_base(self, value, timestamp):
-        self.set_value(round(self._value + (value-64)/1000, 3))
+        step = (value-64)
+        step_abs = abs(step)
+        if step_abs == 1:
+            step = step*0.1
+        elif step_abs == 2:
+            step = step*0.25
+        elif step_abs == 3:
+            step = step*0.333
+
+        self.set_value(round(self._value + step/1000, 4))
+        print(self.value)
         for cb in self._cbs_encoder:
             cb(self, timestamp)
         self._ts_prev_encoder = timestamp
