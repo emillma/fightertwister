@@ -210,9 +210,7 @@ class Encoder(Button):
             step = step*0.25
         elif step_abs == 3:
             step = step*0.333
-
         self.set_value(round(self._value + step/1000, 4))
-        print(self.value)
         for cb in self._cbs_encoder:
             cb(self, timestamp)
         self._ts_prev_encoder = timestamp
