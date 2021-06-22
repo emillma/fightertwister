@@ -35,12 +35,12 @@ class Encoder(Button):
 
         self._value = 0
         self._color = 1
-        self._rgb_strobe = 0
-        self._rgb_pulse = 0
-        self._rgb_brightness = 1
-        self._indicator_strobe = 0
-        self._indicator_pulse = 0
-        self._indicator_brightness = 1
+        # self._rgb_strobe = 0
+        # self._rgb_pulse = 0
+        # self._rgb_brightness = 1
+        # self._indicator_strobe = 0
+        # self._indicator_pulse = 0
+        # self._indicator_brightness = 1
         self._state = 0
 
         self._rgb_state = 47
@@ -118,31 +118,31 @@ class Encoder(Button):
             self.set_color(color)
 
     def set_rgb_strobe(self, strobe):
-        self._rgb_strobe = strobe
-        self._rgb_pulse = 0
+        # self._rgb_strobe = strobe
+        # self._rgb_pulse = 0
         """ 0 to 8"""
         message = int(clamp(strobe, 0, 8) + 0 + 0.5)
         self._send_midi(178, message)
         self._rgb_state = message
 
     def set_rgb_pulse(self, pulse):
-        self._rgb_pulse = pulse
-        self._rgb_strobe = 0
+        # self._rgb_pulse = pulse
+        # self._rgb_strobe = 0
         """ 0 to 7"""
         message = int(clamp(pulse, 0, 7) + 9 + 0.5)
         self._send_midi(178, message)
         self._rgb_state = message
 
     def set_rgb_brightness(self, brightness):
-        self._rgb_brightness = brightness
+        # self._rgb_brightness = brightness
         """ 0. to 1."""
         message = int(clamp(brightness, 0, 1)*30+0.5) + 17
         self._send_midi(178, message)
         self._rgb_state = message
 
     def set_indicator_strobe(self, strobe):
-        self._indicator_strobe = strobe
-        self._indicator_pulse = 0
+        # self._indicator_strobe = strobe
+        # self._indicator_pulse = 0
         """ 0 to 8"""
         message = int(clamp(strobe, 0, 8) + 48 + 0.5)
         self._send_midi(178, message)
@@ -150,7 +150,7 @@ class Encoder(Button):
 
     def set_indicator_pulse(self, pulse):
         """ 0 to 8"""
-        self._indicator_pulse = pulse
+        # self._indicator_pulse = pulse
         message = int(clamp(pulse, 0, 8) + 56 + 0.5)
         message = message if message != 56 else 48
         self._send_midi(178, message)
@@ -158,7 +158,7 @@ class Encoder(Button):
 
     def set_indicator_brightness(self, brightness):
         """ 0. to 1."""
-        self._indicator_brightness = brightness
+        # self._indicator_brightness = brightness
         message = int(clamp(brightness, 0, 1)*30+0.5) + 65
         self._send_midi(178, message)
         self._indicator_state = message
