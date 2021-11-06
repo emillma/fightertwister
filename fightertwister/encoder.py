@@ -203,13 +203,7 @@ class Encoder(Button):
 
     def _cb_encoder_base(self, value, timestamp):
         step = (value-64)
-        step_abs = abs(step)
-        if step_abs == 1:
-            step = step*0.1
-        elif step_abs == 2:
-            step = step*0.25
-        elif step_abs == 3:
-            step = step*0.333
+        print(self.value)
         self.set_value(round(self._value + step/1000, 4))
         for cb in self._cbs_encoder:
             cb(self, timestamp)

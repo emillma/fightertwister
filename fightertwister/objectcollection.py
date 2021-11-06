@@ -1,7 +1,13 @@
 import numpy as np
+from numpy import ndarray
+from typing import List, Tuple, Dict
 
 
 class ObjectCollection:
+    _objects: ndarray
+    _indices: List[Tuple]
+    _idx_table: Dict
+
     def __init__(self, objects):
 
         if isinstance(objects, ObjectCollection):
