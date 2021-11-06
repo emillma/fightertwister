@@ -1,7 +1,3 @@
-import sys
-import time
-if True:
-    sys.path.insert(0, 'src')
 from fightertwister import (FighterTwister, Encoder, Button, ft_colors,
                             heat_color)
 from pygame import midi
@@ -27,4 +23,5 @@ with ft:
     # print(midi.time())
     # ft.encoder_slots[:].flash_color(ft_colors.red)
     # time.sleep(.01)
+    ft.encoders[0,0,0].set_indicator_pulse(6)
     input()

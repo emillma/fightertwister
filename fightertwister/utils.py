@@ -24,17 +24,17 @@ class Task:
 
 
 class ft_colors:
-    red = 85
-    green = 45
-    dark_blue = 1
-    blue = 1
-    light_blue = 24
-    cyan = 38
-    magenta = 105
-    yellow = 64
-    bright_orange = 69
-    orange = 76
-    purple = 110
+    red = 85+127
+    green = 45+127
+    dark_blue = 1+127
+    blue = 1+127
+    light_blue = 24+127
+    cyan = 38+127
+    magenta = 105+127
+    yellow = 64+127
+    bright_orange = 69+127
+    orange = 76+127
+    purple = 110+127
 
 
 heat_spline = UnivariateSpline([0, 0.5, 0.6, 1],

@@ -104,7 +104,21 @@ class FighterTwister:
     def do_task_delay(self, delay, function, *args, **kwargs):
         now = midi.time() if midi.get_init() else 0
         self.do_task_at(now+delay, function, *args, **kwargs)
-
+        
+    def _send_midi(self, channel, address, message, timestamp=None):
+        if self._midi_out is None or not midi.get_init():
+            return
+        try:
+            if address//16 != self.current_bank:  # skip if not visible
+                return
+            if timestamp is None:
+                self._midi_out.write_short(channel, address, message)
+            else:
+                self._midi_out.write(
+                    [[channel, address, message], timestamp])
+        except midi.MidiException:
+            pass
+            
     def loop(self):
         """
         TODO: set rate limit, rgb and indicator brightness
