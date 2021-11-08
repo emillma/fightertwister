@@ -3,24 +3,20 @@ import time
 import numpy as np
 import threading
 from sortedcontainers import SortedKeyList
-from .ftcollections import EncoderCollection, ButtoCollection
+from .ftcollections import KnobCollection, ButtoCollection
 from .encoder import Encoder
 from .button import Button
 from .utils import Task
-from .slots import EncoderSlots, SidebuttonSlots
+from .slots import KnobSlots, SidebuttonSlots
 
 
 class FighterTwister:
     def __init__(self):
 
-        encoders = np.array([Encoder(self)for i in range(64)]
-                            ).reshape(4, 4, 4)
-        self.encoders = EncoderCollection(encoders)
-        self.encoder_slots = EncoderSlots(self.encoders)
+        self.knobs = KnobCollection.from_shape((4, 4, 4), self)
+        self.knob_slots = KnobSlots(self.knobs)
 
-        sidebuttons = np.array([Button(self)for i in range(8, 32)]
-                               ).reshape(4, 3, 2)
-        self.sidebuttons = ButtoCollection(sidebuttons)
+        self.sidebuttons = ButtoCollection.from_shape((4,3,2), self)
         self.sidebutton_slots = SidebuttonSlots(self.sidebuttons)
 
         self.current_bank = 0
@@ -68,9 +64,9 @@ class FighterTwister:
     def set_bank(self, bank):
         self.current_bank = bank
         done = set()
-        for encoder in self.encoder_slots[bank]:
+        for encoder in self.knob_slots[bank]:
             if encoder not in done:
-                encoder._show_properties()
+                encoder.show()
             done.add(encoder)
         self._midi_out.write_short(179, self.current_bank, 127)
 
@@ -84,11 +80,11 @@ class FighterTwister:
         self._last_input = timestamp
         status = message[0]
         if status == 176:
-            self.encoder_slots.get_address(message[1])._cb_encoder_base(
+            self.knob_slots.get_address(message[1]).enc._cb_encoder_base(
                 message[2], timestamp)
 
         elif status == 177:
-            self.encoder_slots.get_address(message[1])._cb_button_base(
+            self.knob_slots.get_address(message[1]).but._cb_button_base(
                 message[2], timestamp)
 
         elif status == 179:

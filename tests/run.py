@@ -9,19 +9,4 @@ ft = FighterTwister()
 # ft.encoder_slots[0, :, 0] = sb
 
 with ft:
-    # sb.set_color(ft_colors.cyan)
-    # time.sleep(1)
-    # ft.encoder_slots[:] = sb
-    # for i in range(16):
-    #     ft.encoders.ravel()[i].set_color(ft_colors.red)
-    #     time.sleep(0.1)
-    #     ft.encoders.ravel()[i].set_color(ft_colors.blue)
-
-    # sb.set_color(ft_colors.blue)
-    # sb.set_on(1)
-    # for i in range(100):
-    # print(midi.time())
-    # ft.encoder_slots[:].flash_color(ft_colors.red)
-    # time.sleep(.01)
-    ft.encoders[0,0,0].set_indicator_pulse(6)
-    input()
+    input('enter to quit')
